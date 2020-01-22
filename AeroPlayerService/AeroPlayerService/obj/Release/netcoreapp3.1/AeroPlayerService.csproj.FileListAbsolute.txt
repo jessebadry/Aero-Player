@@ -1,0 +1,13 @@
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.exe
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.deps.json
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.runtimeconfig.json
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.runtimeconfig.dev.json
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.dll
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\AeroPlayerService.pdb
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\bin\Release\netcoreapp3.1\NAudio.dll
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.AssemblyInfoInputs.cache
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.AssemblyInfo.cs
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.csproj.CopyComplete
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.dll
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.pdb
+D:\Code\C# Code\Aero Player\AeroPlayerService\AeroPlayerService\obj\Release\netcoreapp3.1\AeroPlayerService.csprojAssemblyReference.cache
