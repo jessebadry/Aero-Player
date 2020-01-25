@@ -9,8 +9,9 @@ namespace AeroPlayerService
     {
 
         public List<string> Songs { get; set; }
-        private int current_index = 0;
-        private int CurrentIndex
+
+        private int current_index;
+        public int CurrentIndex
         {
             get
             {
@@ -30,13 +31,12 @@ namespace AeroPlayerService
         {
             get
             {
-
+                
                 return Songs[CurrentIndex];
             }
             set
             {
                 CurrentSong = value;
-                onPropertyChanged("CurrentSong");
             }
 
         }
@@ -44,23 +44,37 @@ namespace AeroPlayerService
         {
             CurrentIndex = Songs.IndexOf(song);
         }
+        public void SetSongIndex(int index)
+        {
+            if (Songs.Count - 1 >= index && index <= 0 )
+            {
+                //Change Low level index of songs so next time current song is retrieved, songs will start from the beginning of the playlist.
+                current_index = index;
+            }
+            else
+            {
+                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", Name, index));
+            }
+        }
         public bool NextSong(bool next)
         {
+            
             if (CurrentIndex == Songs.Count - 1 && next)
             {
-                Console.WriteLine("End  of playlist!!!");
+               
                 CurrentIndex = 0;
 
                 return true;
             }
             else if (CurrentIndex == 0 && !next)
             {
-
+               
                 CurrentIndex = Songs.Count - 1;
                 return true;
             }
             else if (next)
             {
+                
                 CurrentIndex++;
 
             }
@@ -74,12 +88,12 @@ namespace AeroPlayerService
 
         public PlayList()
         {
-            
-            current_index = 0;
+
+            current_index = -1;
 
         }
 
-  
+
     }
 
 }
