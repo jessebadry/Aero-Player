@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AeroPlayer", "AeroPlayer\AeroPlayer.csproj", "{39B6834A-DBB9-4FAB-A095-1FDF93E28DC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AeroPlayerService", "..\AeroPlayerService\AeroPlayerService\AeroPlayerService.csproj", "{28C4D1C3-CAD3-4C6D-8B41-4548DD4BABC3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{39B6834A-DBB9-4FAB-A095-1FDF93E28DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39B6834A-DBB9-4FAB-A095-1FDF93E28DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39B6834A-DBB9-4FAB-A095-1FDF93E28DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39B6834A-DBB9-4FAB-A095-1FDF93E28DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28C4D1C3-CAD3-4C6D-8B41-4548DD4BABC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28C4D1C3-CAD3-4C6D-8B41-4548DD4BABC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28C4D1C3-CAD3-4C6D-8B41-4548DD4BABC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28C4D1C3-CAD3-4C6D-8B41-4548DD4BABC3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {43B6A928-7E07-4D3E-93B4-4DCBB2B481C7}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,70 @@
+﻿<Window x:Class="AeroPlayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AeroPlayer"
+        mc:Ignorable="d" Background="gray"
+        Title="Aero Player" Height="450" Width="800">
+
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="80"></RowDefinition>
+            <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" Grid.Column="0">
+            <TabItem Header="Library">
+                <ContentControl   HorizontalAlignment="Stretch" Content="{StaticResource ResourceKey=SongSelect}"></ContentControl>
+            </TabItem>
+            <TabItem Header="Youtube Downloader">
+            </TabItem>
+            
+        </TabControl>
+        <StackPanel Grid.Column="0" Grid.Row="1">
+            <TextBlock FontSize="25" HorizontalAlignment="Center"  >
+                <TextBlock.Text>
+                    <Binding Path="CurrentSong">
+                        <Binding.StringFormat>
+                            Currently Playing: {0}
+                        </Binding.StringFormat>
+                    </Binding>
+                </TextBlock.Text>
+            </TextBlock>
+            <TextBlock FontSize="15" HorizontalAlignment="Center"  >
+                <TextBlock.Text>
+                    <Binding Path="CurrentPlayList">
+                        <Binding.StringFormat>
+                                    from {0}
+                        </Binding.StringFormat>
+                    </Binding>
+                </TextBlock.Text>
+            </TextBlock>
+            
+        </StackPanel>
+        <Slider Width="500" Margin="0,0,0,0" Grid.Row="2" Value="{Binding PlaybackPos}" Maximum="{Binding PlayBackLength, Mode=OneWay}">
+
+        </Slider>
+        <DockPanel HorizontalAlignment="Center"  Grid.Column="0" Grid.Row="3">
+            <Button   Width="50" Height="50"  Command="{Binding NextSongFalse }"   Style="{StaticResource ResourceKey=MusicPlayerButton}">
+                left
+            </Button>
+            <Button Content="{Binding PlayingStatus}" Command="{Binding PlaySong}"  Width="50" Height="50"   Style="{StaticResource MusicPlayerButton}">
+
+            </Button>
+            <Button  Width="50" Height="50" Command="{Binding NextSongTrue }"  Style="{StaticResource MusicPlayerButton}">
+                right
+            </Button>
+            <Slider Width="100" Value="{Binding Volume}" Maximum="1">
+                
+            </Slider>
+         
+        </DockPanel>
+
+    </Grid>
+</Window>
