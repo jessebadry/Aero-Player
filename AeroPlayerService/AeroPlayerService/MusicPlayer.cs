@@ -3,28 +3,57 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Timers;
+
 namespace AeroPlayerService
 {
 
 
-    enum PlayLoop
+
+    public enum MusicEventType
     {
-        SingleLoop,
-        PlayListLoop,
-        NoLoop
+
+        //Passes bool of toggle
+        TogglePauseEvent,
+        // Passes String of song name
+        NewSongEvent
     }
+    public delegate void MusicPlayerEvent(object sender, MusicPlayerEventArgs e);
+
+    public delegate void NewPlaybackHandler(object sender, EventArgs e);
+
+    public class MusicPlayerEventArgs : EventArgs
+    {
+        public MusicEventType EventType { get; }
+        public object Data { get; }
+        public MusicPlayerEventArgs(MusicEventType EventType, object data)
+        {
+            this.EventType = EventType;
+            Data = data;
+        }
+
+    }
+
     // Uses MusicQueue to select next song to play to audio.
     public class MusicPlayer : PropertyObject
     {
         const float MAX_VOLUME = 1F; // Max volume for NAudio WaveOutEvent..
         const bool DEFAULT_PLAYLIST_DIRECTION = true; // forward.
 
-        private WaveOutEvent AudioOut = new WaveOutEvent();
-        private Mp3FileReader mp3Reader;
-        public readonly MusicManager SongManager = MusicManager.Instance;
 
-        PlayLoop LoopType = PlayLoop.PlayListLoop;
 
+        WaveOutEvent AudioOut = new WaveOutEvent();
+        Mp3FileReader mp3Reader;
+        PlaybackState UserDefinedPlayState = PlaybackState.Stopped;
+
+        //Object that manages the songs the player uses.
+        public readonly MusicManager SongManager;
+
+
+        //Events
+        public event MusicPlayerEvent MusicPlayerEvent;
+        public event NewPlaybackHandler OnPlaybackChange;
+        //
         //SETTINGS
         public float Volume
         {
@@ -36,13 +65,85 @@ namespace AeroPlayerService
             {
                 if (value > MAX_VOLUME)
                 {
-                    AudioOut.Volume = 1;
+                    AudioOut.Volume = MAX_VOLUME;
                     return;
+                }
+                else
+                {
+
                 }
                 AudioOut.Volume = value;
 
             }
         }
+        public double AudioMaxLength
+        {
+            get => mp3Reader.TotalTime.TotalSeconds;
+        }
+        public double PlaybackPos
+        {
+            get
+            {
+                double time = mp3Reader.CurrentTime.TotalSeconds;
+                if (time > AudioMaxLength)
+                    AudioOut.Stop();
+                return time;
+            }
+            set
+            {
+                try
+                {
+
+                    if (mp3Reader != null)
+                    {
+                        TimeSpan time = TimeSpan.FromSeconds(value);
+
+                        if (time.TotalSeconds < AudioMaxLength)
+                            mp3Reader.CurrentTime = time;
+                    }
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+
+            }
+
+        }
+        private Timer timer;
+        //
+        private void UpdatePlaybackPosition()
+        {
+            PlaybackPos = mp3Reader.CurrentTime.TotalSeconds;
+            OnPositionChange();
+        }
+        private void StartPositionListener()
+        {
+
+            timer = new Timer(300);
+            timer.Elapsed += delegate (object sender, ElapsedEventArgs e)
+            {
+                UpdatePlaybackPosition();
+            };
+            timer.AutoReset = true;
+            timer.Enabled = true;
+        }
+        protected virtual void OnPositionChange()
+        {
+
+            NewPlaybackHandler handler = OnPlaybackChange;
+            handler?.Invoke(this, new EventArgs());
+        }
+        //INFORMATION
+        public bool PlayingStatus
+        {
+            get
+            {
+                return AudioOut.PlaybackState == PlaybackState.Playing;
+            }
+        }
+
+
         private string song_display;
         public string SongDisplay
         {
@@ -50,7 +151,7 @@ namespace AeroPlayerService
 
             set
             {
-                song_display = Path.GetFileName(value).Split('.')[0];
+                song_display = Path.GetFileNameWithoutExtension(value);
                 onPropertyChanged("SongDisplay");
             }
         }
@@ -65,38 +166,43 @@ namespace AeroPlayerService
             }
         }
 
-        public void ToggleLooping()
-        {
 
-            if (LoopType == PlayLoop.PlayListLoop)
-            {
-
-                LoopType = PlayLoop.SingleLoop;
-            }
-            else if (LoopType == PlayLoop.SingleLoop)
-            {
-                LoopType = PlayLoop.NoLoop;
-            }
-            else if (LoopType == PlayLoop.NoLoop)
-            {
-
-                LoopType = PlayLoop.PlayListLoop;
-            }
-
-
-        }
 
         public void PlayNextSong(bool next)
         {
             SongManager.NextSong(next);
         }
 
+        //Toggles Audio playing=>paused, pause=>playing.
+        //
+        //If song is not initailized, music player will request new song from SongManager.
         public void PauseToggle()
         {
-            if (AudioOut.PlaybackState == PlaybackState.Playing)
-                AudioOut.Pause();
-            else
-                AudioOut.Play();
+
+            try
+            {
+                if (AudioOut.PlaybackState == PlaybackState.Playing)
+                {
+
+
+                    AudioOut.Pause();
+                    UserDefinedPlayState = PlaybackState.Paused;
+                }
+                else
+                {
+
+                    AudioOut.Play();
+                    UserDefinedPlayState = PlaybackState.Playing;
+                }
+
+            }
+            catch (Exception)
+            {
+                //Song not initialize so try and play new song
+                SongManager.NextSong(true);
+            }
+
+            InvokeMusicPlayerEvent(MusicEventType.TogglePauseEvent, true);
 
         }
         public static void Main(string[] args)
@@ -141,9 +247,10 @@ namespace AeroPlayerService
                             Console.WriteLine("new device = " + player.AudioOut.DeviceNumber);
                             break;
                         case "loop":
-                            player.ToggleLooping();
-                            Console.WriteLine("Current looping is .. " + player.LoopType);
+                            player.SongManager.ToggleLooping();
+                            Console.WriteLine("Current looping is .. " + player.SongManager.LoopType);
                             break;
+
 
                     }
 
@@ -151,9 +258,9 @@ namespace AeroPlayerService
                 else
                 {
 
-                    player.PlayNextSong(DEFAULT_PLAYLIST_DIRECTION);
+                    player.SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
                 }
-                Console.WriteLine("CurrentIndex= {0}", player.SongManager.CurrentPlayList.CurrentIndex);
+
 
 
 
@@ -161,7 +268,11 @@ namespace AeroPlayerService
 
 
         }
-        private void Play(string song_name)
+        public bool NotPlaying()
+        {
+            return mp3Reader == null;
+        }
+        private void LoadSong(string song_name)
         {
             AudioOut.Stop();
             AudioOut.Dispose();
@@ -175,19 +286,25 @@ namespace AeroPlayerService
 
             mp3Reader = new Mp3FileReader(song_name);
             AudioOut.Init(mp3Reader);
-            AudioOut.Play();
 
+            PlaybackPos = mp3Reader.TotalTime.TotalSeconds;
         }
         public void PlaySong(string playlist, string song_name)
         {
-            Console.WriteLine("Now Playing " + Path.GetFileName(song_name).Split('.')[0]);
-            Console.WriteLine("From playlist  =  " + playlist);
 
-            AudioOut.PlaybackStopped -= MusicStoppedHandler;
-            Play(song_name);
+
+
+            AudioOut.PlaybackStopped -= MusicStoppedHandler; // Remove MusicHandler as Current instance of AudioOut is being disposed.
+            LoadSong(song_name);
             AudioOut.PlaybackStopped += MusicStoppedHandler;
 
+            if (UserDefinedPlayState == PlaybackState.Playing)
+            {
+                AudioOut.Play();
+            }
 
+            SongDisplay = song_name;
+            PlayListDisplay = playlist;
 
         }
 
@@ -195,18 +312,17 @@ namespace AeroPlayerService
         {
             //Essentially handels what to do automatically after a song ends..
 
-            switch (LoopType)
+            switch (SongManager.LoopType)
             {
                 case PlayLoop.SingleLoop:
-                    Play(SongManager.CurrentSong);
+                    LoadSong(SongManager.SongAbsolute);
+                    AudioOut.Play();
 
                     break;
                 case PlayLoop.PlayListLoop:
-                    SongManager.LoopPlayList = true;
                     SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
                     break;
                 case PlayLoop.NoLoop:
-                    SongManager.LoopPlayList = false;
                     SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
                     break;
             }
@@ -218,12 +334,26 @@ namespace AeroPlayerService
 
         public MusicPlayer()
         {
-            SongManager.OnSongChange += delegate(object sender, MusicManagerEventArgs e) { PlaySong(e.PlayList, e.NewSong); };
+
+            SongManager = MusicManager.Instance;
+
+            SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
+            {
+
+                PlaySong(e.PlayList, e.NewSong);
+
+
+            };
+            StartPositionListener();
         }
 
-        public void Dispose()
+
+        protected virtual void InvokeMusicPlayerEvent(MusicEventType type, object data)
         {
-            throw new NotImplementedException();
+            MusicPlayerEvent handler = MusicPlayerEvent;
+            handler?.Invoke(this, new MusicPlayerEventArgs(type, data));
         }
+
+
     }
 }
