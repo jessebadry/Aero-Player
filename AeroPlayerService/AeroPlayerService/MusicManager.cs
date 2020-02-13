@@ -91,6 +91,7 @@ namespace AeroPlayerService
         //
 
         //Storage
+
         private readonly List<PlayList> PlayLists = new List<PlayList>();
         public List<PlayListDetail> GetPlayListDetails()
         {
@@ -250,7 +251,7 @@ namespace AeroPlayerService
 
                 playlist.Songs.Add(newSongPlace);
 
-
+                Invoke
 
             }
 
