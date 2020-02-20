@@ -49,7 +49,8 @@ namespace AeroPlayerService
         {
             get
             {
-
+                if (CurrentIndex > Songs.Count - 1 || CurrentIndex < 0)
+                    return null;
                 return Songs[CurrentIndex];
             }
             set

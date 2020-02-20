@@ -40,10 +40,13 @@ namespace AeroPlayerService
         const float MAX_VOLUME = 1F; // Max volume for NAudio WaveOutEvent..
         const bool DEFAULT_PLAYLIST_DIRECTION = true; // forward.
 
-
+        public static void Main(string[] args) { }
 
         WaveOutEvent AudioOut = new WaveOutEvent();
         Mp3FileReader mp3Reader;
+
+
+
         PlaybackState UserDefinedPlayState = PlaybackState.Stopped;
 
         //Object that manages the songs the player uses.
@@ -78,15 +81,33 @@ namespace AeroPlayerService
         }
         public double AudioMaxLength
         {
-            get => mp3Reader.TotalTime.TotalSeconds;
+            get
+            {
+                double seconds;
+                if (!nullAudio())
+                    seconds = mp3Reader.TotalTime.TotalSeconds;
+                else return 0;
+
+                return seconds;
+
+            }
         }
         public double PlaybackPos
         {
             get
             {
-                double time = mp3Reader.CurrentTime.TotalSeconds;
-                if (time > AudioMaxLength)
-                    AudioOut.Stop();
+                double time = 0;
+                if (!nullAudio())
+                {
+
+                    time = mp3Reader.CurrentTime.TotalSeconds;
+                    if (time > AudioMaxLength)
+                        AudioOut.Stop();
+                }
+                else
+                {
+                    return 0;
+                }
                 return time;
             }
             set
@@ -94,16 +115,16 @@ namespace AeroPlayerService
                 try
                 {
 
-                    if (mp3Reader != null)
+                    if (!nullAudio())
                     {
                         TimeSpan time = TimeSpan.FromSeconds(value);
 
                         if (time.TotalSeconds < AudioMaxLength)
                             mp3Reader.CurrentTime = time;
                     }
-                }catch(Exception e)
+                }
+                catch (Exception )
                 {
-                    Console.WriteLine(e);
                 }
 
 
@@ -114,8 +135,12 @@ namespace AeroPlayerService
         //
         private void UpdatePlaybackPosition()
         {
-            PlaybackPos = mp3Reader.CurrentTime.TotalSeconds;
-            OnPositionChange();
+            if (mp3Reader != null)
+            {
+
+                PlaybackPos = mp3Reader.CurrentTime.TotalSeconds;
+                OnPositionChange();
+            }
         }
         private void StartPositionListener()
         {
@@ -196,88 +221,29 @@ namespace AeroPlayerService
                 }
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 //Song not initialize so try and play new song
+                Console.WriteLine(e);
                 SongManager.NextSong(true);
             }
 
             InvokeMusicPlayerEvent(MusicEventType.TogglePauseEvent, true);
 
         }
-        public static void Main(string[] args)
-        {
-            //Debug method
-            MusicPlayer player = new MusicPlayer();
-            player.SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
-            player.SongManager.LoopPlayList = false;
 
-            Console.WriteLine("AeroPlayerService  Testing Interface....");
-
-            while (true)
-            {
-                Console.WriteLine("Enter To Skip Song");
-                string input = Console.ReadLine();
-
-                if (!string.IsNullOrEmpty(input))
-                {
-                    var parameters = input.Split(' ');
-                    string command = parameters[0];
-                    switch (command)
-                    {
-                        case "vol":
-                            bool worked = float.TryParse(parameters[1], out float volumeOffset);
-                            if (worked)
-                                player.Volume = volumeOffset;
-                            else
-                                Console.WriteLine("Invalid volume");
-                            break;
-
-                        case "p":
-                            player.PauseToggle();
-                            break;
-
-                        case "skip":
-                            bool next = (parameters[1] == "true");
-                            player.PlayNextSong(next);
-                            break;
-
-                        case "device":
-                            player.AudioOut.DeviceNumber = int.Parse(parameters[1]);
-                            Console.WriteLine("new device = " + player.AudioOut.DeviceNumber);
-                            break;
-                        case "loop":
-                            player.SongManager.ToggleLooping();
-                            Console.WriteLine("Current looping is .. " + player.SongManager.LoopType);
-                            break;
-
-
-                    }
-
-                }
-                else
-                {
-
-                    player.SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
-                }
-
-
-
-
-            }
-
-
-        }
-        public bool NotPlaying()
+        public bool nullAudio()
         {
             return mp3Reader == null;
         }
         private void LoadSong(string song_name)
         {
+            if (song_name == null)
+                return;
             AudioOut.Stop();
             AudioOut.Dispose();
 
-            if (mp3Reader != null)
+            if (!nullAudio())
             {
                 mp3Reader.Close();
                 mp3Reader.Dispose();
@@ -287,7 +253,7 @@ namespace AeroPlayerService
             mp3Reader = new Mp3FileReader(song_name);
             AudioOut.Init(mp3Reader);
 
-            PlaybackPos = mp3Reader.TotalTime.TotalSeconds;
+            PlaybackPos = 0;
         }
         public void PlaySong(string playlist, string song_name)
         {
@@ -310,7 +276,7 @@ namespace AeroPlayerService
 
         private void MusicStoppedHandler(object sender, StoppedEventArgs e)
         {
-            //Essentially handels what to do automatically after a song ends..
+            // handles what to do automatically after a song ends..
 
             switch (SongManager.LoopType)
             {
@@ -339,7 +305,7 @@ namespace AeroPlayerService
 
             SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
-
+                
                 PlaySong(e.PlayList, e.NewSong);
 
 

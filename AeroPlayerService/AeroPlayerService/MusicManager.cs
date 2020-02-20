@@ -144,7 +144,7 @@ namespace AeroPlayerService
                     }
                     else
                     {
-                        throw new NullReferenceException("There is no playlists avaliable!");
+
                     }
 
                 return current_playlist;
@@ -232,8 +232,7 @@ namespace AeroPlayerService
                 if (playlist == null && !string.IsNullOrEmpty(playlistName))
                     playlist = CreateNewPlayList(playlistName, new List<string>());
 
-                else
-                    playlist.Songs.Add(NewSong);
+
 
 
                 string newSongPlace = Path.Join(MusicPlayerPath, playlistName, Path.GetFileName(NewSong));
@@ -251,7 +250,7 @@ namespace AeroPlayerService
 
                 playlist.Songs.Add(newSongPlace);
 
-                Invoke
+
 
             }
 
@@ -262,6 +261,8 @@ namespace AeroPlayerService
 
         public void RandomInPlayList()
         {
+            if (CurrentPlayList == null)
+                return;
             Random rand = new Random();
             var songs = CurrentPlayList.Songs;
             int skip = rand.Next(0, songs.Count);
@@ -305,12 +306,16 @@ namespace AeroPlayerService
         }
         public void NextSong(bool next)
         {
-            bool PotentialPlayListChange = CurrentPlayList.NextSong(next);
-            if (LoopType == PlayLoop.NoLoop)
+            if (CurrentPlayList != null)
             {
-                CheckAndChangePlaylist(ref next, ref PotentialPlayListChange);
+
+                bool PotentialPlayListChange = CurrentPlayList.NextSong(next);
+                if (LoopType == PlayLoop.NoLoop)
+                {
+                    CheckAndChangePlaylist(ref next, ref PotentialPlayListChange);
+                }
+                this.SongAbsolute = CurrentPlayList.CurrentSong;
             }
-            this.SongAbsolute = CurrentPlayList.CurrentSong;
         }
 
         public void LoadAllSongs()
