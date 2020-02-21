@@ -49,7 +49,7 @@ namespace AeroPlayerService
         {
             get
             {
-                if (CurrentIndex > Songs.Count - 1 || CurrentIndex < 0)
+                if (!ValidSongIndex(CurrentIndex))
                     return null;
                 return Songs[CurrentIndex];
             }

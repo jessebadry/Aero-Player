@@ -161,12 +161,7 @@ namespace AeroPlayerService
             NewSongHandler handler = OnSongChange;
             handler?.Invoke(this, e);
         }
-        private void AlignPlayListAndSongPath(out string playlistName, out string songName)
-        {
-            playlistName = "efokoefk";
-            songName = "ofekoekfef";
-        }
-
+    
         public PlayList CreateNewPlayList(string name, List<string> new_songs = null)
         {
 
