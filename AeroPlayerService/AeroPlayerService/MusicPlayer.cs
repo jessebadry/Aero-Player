@@ -96,13 +96,12 @@ namespace AeroPlayerService
         {
             get
             {
-                double time = 0;
+                double time;
                 if (!nullAudio())
                 {
 
                     time = mp3Reader.CurrentTime.TotalSeconds;
-                    if (time > AudioMaxLength)
-                        AudioOut.Stop();
+                
                 }
                 else
                 {
@@ -114,11 +113,11 @@ namespace AeroPlayerService
             {
                 try
                 {
+                  
 
                     if (!nullAudio())
                     {
                         TimeSpan time = TimeSpan.FromSeconds(value);
-
                         if (time.TotalSeconds < AudioMaxLength)
                             mp3Reader.CurrentTime = time;
                     }

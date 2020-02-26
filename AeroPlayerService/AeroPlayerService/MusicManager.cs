@@ -15,7 +15,7 @@ namespace AeroPlayerService
     // Non-Instance based, does not need multiple MusicQueues, does not apply.
 
     public delegate void NewSongHandler(object sender, MusicManagerEventArgs e);
-
+    public delegate void AddSongHandler(object sender, PlayListDetail playlist);
     public class MusicManagerEventArgs : EventArgs
     {
         public string NewSong { get; }
@@ -88,6 +88,7 @@ namespace AeroPlayerService
 
         //Events
         public event NewSongHandler OnSongChange;
+        public event AddSongHandler OnAddSong;
         //
 
         //Storage
@@ -100,12 +101,9 @@ namespace AeroPlayerService
             for (int i = 0; i < PlayLists.Count; i++)
             {
                 var pl = PlayLists[i];
-                string plName;
 
 
-                plName = pl.PlayListDisplay;
-
-                playListDetails.Add(new PlayListDetail(plName, pl.Songs, pl.AbsoluteName));
+                playListDetails.Add(new PlayListDetail(pl));
             }
 
             return playListDetails;
@@ -161,7 +159,11 @@ namespace AeroPlayerService
             NewSongHandler handler = OnSongChange;
             handler?.Invoke(this, e);
         }
-    
+        protected virtual void OnAddSong_Run(PlayListDetail playList)
+        {
+            AddSongHandler handler = OnAddSong;
+            handler?.Invoke(this, playList);
+        }
         public PlayList CreateNewPlayList(string name, List<string> new_songs = null)
         {
 
@@ -213,44 +215,49 @@ namespace AeroPlayerService
 
 
         }
+        private PlayList findPlayList(string playlistName) => PlayLists.Where(p => p.PlayListDisplay == playlistName).FirstOrDefault();
 
-        public bool AddSong(string playlistName, string NewSong)
+        //Returns bool  if successful.
+        public bool AddSongs(string playlistName, string[] NewSongs)
         {
 
-            if (!File.Exists(NewSong))
-                return false;
-            else
+            PlayList playlist;
+
+
+            playlist = findPlayList(playlistName);
+
+            if (playlist == null && !string.IsNullOrEmpty(playlistName))
+                playlist = CreateNewPlayList(playlistName, new List<string>());
+
+          
+            foreach (string NewSong in NewSongs)
             {
 
-                var playlist = PlayLists.Where(p => p.PlayListDisplay == playlistName).FirstOrDefault();
-
-                if (playlist == null && !string.IsNullOrEmpty(playlistName))
-                    playlist = CreateNewPlayList(playlistName, new List<string>());
-
-
-
-
                 string newSongPlace = Path.Join(MusicPlayerPath, playlistName, Path.GetFileName(NewSong));
-
-
+                if (playlist.Songs.Contains(newSongPlace))
+                    continue;
+                
+                if (!File.Exists(NewSong))
+                    return false;
 
                 try
                 {
-                    File.Copy(NewSong, newSongPlace);
+                    File.Copy(NewSong, newSongPlace, true);
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine(e);
                     return false;
                 }
 
                 playlist.Songs.Add(newSongPlace);
-
-
-
             }
 
 
 
+
+
+            OnAddSong_Run(new PlayListDetail(playlist));
             return true;
         }
 
@@ -330,6 +337,7 @@ namespace AeroPlayerService
 
 
             }
+            Console.WriteLine("PlayList Count = " + PlayLists.Count);
         }
 
         MusicManager()
