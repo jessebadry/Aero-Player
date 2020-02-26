@@ -10,7 +10,12 @@
             <ColumnDefinition Width="200"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <ListBox  IsSynchronizedWithCurrentItem="True"  ItemsSource="{Binding Path=PlayLists}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+
+        </Grid.RowDefinitions>
+        <ListBox SelectedItem="{Binding CurrentPlayList,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"  ItemsSource="{Binding Path=PlayLists}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
@@ -22,9 +27,10 @@
 
         </ListBox>
         
-        <ContentControl Grid.Column="1" x:Name="PlayListContentControl" Content="{Binding Path=PlayLists}"
+        <ContentControl Grid.Column="1" Grid.RowSpan="2" x:Name="PlayListContentControl" Content="{Binding Path=PlayLists}"
                         ContentTemplate="{StaticResource SongList}" >
             
         </ContentControl>
+        <Button Command="{Binding AddSong}" Grid.Column="0" Grid.Row="1" Content="Add Song"></Button>
     </Grid>
 </UserControl>

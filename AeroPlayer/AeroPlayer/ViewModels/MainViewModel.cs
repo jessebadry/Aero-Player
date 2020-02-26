@@ -26,7 +26,7 @@ namespace AeroPlayer.ViewModels
         public double PlaybackPos
         {
             get => player.PlaybackPos;
-            set { player.PlaybackPos = value; onPropertyChanged("PlaybackPos"); onPropertyChanged("PlayBackLength"); }
+            set { player.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
         }
         public string CurrentSong
         {
@@ -35,6 +35,7 @@ namespace AeroPlayer.ViewModels
             {
                 currentSong = value;
                 onPropertyChanged("CurrentSong");
+                onPropertyChanged("PlayBackLength");
             }
         }
         public string CurrentPlayList

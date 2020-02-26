@@ -3,7 +3,7 @@
                     xmlns:local="clr-namespace:AeroPlayer.WPFControls">
     <DataTemplate x:Key="SongList" >
 
-        <ListBox x:Name="List"   SelectedItem="{Binding Path=DataContext.Song,  ElementName=PlayListContentControl}"  ItemsSource="{Binding Songs}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
+        <ListBox x:Name="List"   SelectedItem="{Binding Path=DataContext.Song,Mode=TwoWay,  ElementName=PlayListContentControl}"  ItemsSource="{Binding Songs}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
                     <Style.Triggers>
@@ -24,7 +24,6 @@
                 </DataTemplate>
 
             </ListBox.ItemTemplate>
-
         </ListBox>
     </DataTemplate>
 </ResourceDictionary>

@@ -35,6 +35,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="SongSelectionTemplate.xaml"/>
     </ResourceDictionary.MergedDictionaries>
