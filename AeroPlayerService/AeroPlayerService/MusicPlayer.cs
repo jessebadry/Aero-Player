@@ -40,7 +40,7 @@ namespace AeroPlayerService
         const float MAX_VOLUME = 1F; // Max volume for NAudio WaveOutEvent..
         const bool DEFAULT_PLAYLIST_DIRECTION = true; // forward.
 
-        public static void Main(string[] args) { }
+     
 
         WaveOutEvent AudioOut = new WaveOutEvent();
         Mp3FileReader mp3Reader;
