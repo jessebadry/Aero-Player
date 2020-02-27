@@ -56,7 +56,7 @@ namespace AeroPlayer.ViewModels
             player = new MusicPlayer();
             player.OnPlaybackChange += delegate (object sender, EventArgs e)
              {
-                 PlaybackPos = player.PlaybackPos;
+                 onPropertyChanged("PlaybackPos");
              };
             player.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {

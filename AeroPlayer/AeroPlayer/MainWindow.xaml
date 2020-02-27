@@ -47,7 +47,7 @@
             </TextBlock>
             
         </StackPanel>
-        <Slider Width="500" Margin="0,0,0,0" Grid.Row="2" Value="{Binding PlaybackPos, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Maximum="{Binding PlayBackLength, Mode=OneWay}">
+        <Slider Width="500" Margin="0,0,0,0" Grid.Row="2" Value="{Binding PlaybackPos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding PlayBackLength, Mode=OneWay}">
 
         </Slider>
         <DockPanel HorizontalAlignment="Center"  Grid.Column="0" Grid.Row="3">
