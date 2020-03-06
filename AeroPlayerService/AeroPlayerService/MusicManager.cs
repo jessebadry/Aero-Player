@@ -42,10 +42,8 @@ namespace AeroPlayerService
         public PlayLoop LoopType = PlayLoop.PlayListLoop;
         public void ToggleLooping()
         {
-
             if (LoopType == PlayLoop.PlayListLoop)
             {
-
                 LoopType = PlayLoop.SingleLoop;
             }
             else if (LoopType == PlayLoop.SingleLoop)
@@ -59,12 +57,7 @@ namespace AeroPlayerService
                 LoopPlayList = true;
                 LoopType = PlayLoop.PlayListLoop;
             }
-
-
         }
-
-
-
         //Singleton impl...
         private static MusicManager instance = null;
         public static MusicManager Instance
@@ -109,13 +102,8 @@ namespace AeroPlayerService
             return playListDetails;
         }
         public bool LoopPlayList { get; set; } = false;
-
-
         //
-
-
         private string playing_song;
-
         public string SongAbsolute
         {
             get

@@ -8,8 +8,28 @@ namespace AeroPlayerService
     {
         public static void Main(string[] args)
         {
-            string link = Console.ReadLine();
-            YouTubeDownloader.GetSong(link);
+            try
+            {
+
+                var player = new MusicPlayer();
+                player.PlayNextSong(true);
+                player.PauseToggle();
+                while (true)
+                {
+                    string line = Console.ReadLine();
+                    switch (line)
+                    {
+                        case "s":
+                            player.SongManager.NextSong(true);
+                            break;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            Console.WriteLine("FInished loop");
         }
     }
 }

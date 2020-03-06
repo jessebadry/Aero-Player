@@ -75,7 +75,10 @@ namespace AeroPlayerService
                 throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", AbsoluteName, new_index));
             }
         }
-
+        public void changeSongName(string name, int index)
+        {
+            Songs[index] = name;
+        }
         public void SetSongIndex(int index)
         {
             Console.WriteLine("new index == " + index);

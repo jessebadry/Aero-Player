@@ -1,8 +1,6 @@
 ﻿using NAudio.Wave;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Timers;
 
 namespace AeroPlayerService
@@ -20,7 +18,7 @@ namespace AeroPlayerService
     }
     public delegate void MusicPlayerEvent(object sender, MusicPlayerEventArgs e);
 
-    public delegate void NewPlaybackHandler(object sender, EventArgs e);
+    public delegate void NewPlaybackEventHandler(object sender, EventArgs e);
 
     public class MusicPlayerEventArgs : EventArgs
     {
@@ -40,7 +38,7 @@ namespace AeroPlayerService
         const float MAX_VOLUME = 1F; // Max volume for NAudio WaveOutEvent..
         const bool DEFAULT_PLAYLIST_DIRECTION = true; // forward.
 
-     
+
 
         WaveOutEvent AudioOut = new WaveOutEvent();
         Mp3FileReader mp3Reader;
@@ -55,7 +53,7 @@ namespace AeroPlayerService
 
         //Events
         public event MusicPlayerEvent MusicPlayerEvent;
-        public event NewPlaybackHandler OnPlaybackChange;
+        public event NewPlaybackEventHandler OnPlaybackChange;
         //
         //SETTINGS
         public float Volume
@@ -69,6 +67,7 @@ namespace AeroPlayerService
                 if (value > MAX_VOLUME)
                 {
                     AudioOut.Volume = MAX_VOLUME;
+
                     return;
                 }
                 else
@@ -101,7 +100,7 @@ namespace AeroPlayerService
                 {
 
                     time = mp3Reader.CurrentTime.TotalSeconds;
-                
+
                 }
                 else
                 {
@@ -113,7 +112,7 @@ namespace AeroPlayerService
             {
                 try
                 {
-                  
+
 
                     if (!nullAudio())
                     {
@@ -122,7 +121,7 @@ namespace AeroPlayerService
                             mp3Reader.CurrentTime = time;
                     }
                 }
-                catch (Exception )
+                catch (Exception)
                 {
                 }
 
@@ -132,22 +131,14 @@ namespace AeroPlayerService
         }
         private Timer timer;
         //
-        private void UpdatePlaybackPosition()
-        {
-            if (mp3Reader != null)
-            {
 
-                PlaybackPos = mp3Reader.CurrentTime.TotalSeconds;
-                OnPositionChange();
-            }
-        }
         private void StartPositionListener()
         {
 
             timer = new Timer(300);
             timer.Elapsed += delegate (object sender, ElapsedEventArgs e)
             {
-                UpdatePlaybackPosition();
+                OnPositionChange();
             };
             timer.AutoReset = true;
             timer.Enabled = true;
@@ -155,7 +146,7 @@ namespace AeroPlayerService
         protected virtual void OnPositionChange()
         {
 
-            NewPlaybackHandler handler = OnPlaybackChange;
+            NewPlaybackEventHandler handler = OnPlaybackChange;
             handler?.Invoke(this, new EventArgs());
         }
         //INFORMATION
@@ -276,7 +267,7 @@ namespace AeroPlayerService
         private void MusicStoppedHandler(object sender, StoppedEventArgs e)
         {
             // handles what to do automatically after a song ends..
-
+            Console.WriteLine("stopped");
             switch (SongManager.LoopType)
             {
                 case PlayLoop.SingleLoop:
@@ -304,7 +295,7 @@ namespace AeroPlayerService
 
             SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
-                
+
                 PlaySong(e.PlayList, e.NewSong);
 
 
