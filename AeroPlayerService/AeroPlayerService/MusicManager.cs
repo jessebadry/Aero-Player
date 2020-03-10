@@ -248,7 +248,7 @@ namespace AeroPlayerService
             OnAddSong_Run(new PlayListDetail(playlist));
             return true;
         }
-
+        ///<summary>Deprecated, unsafe method, needs reworking</summary>
         public void RandomInPlayList()
         {
             if (CurrentPlayList == null)
