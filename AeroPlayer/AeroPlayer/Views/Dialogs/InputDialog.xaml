@@ -1,0 +1,14 @@
+﻿<Window x:Class="AeroPlayer.Views.Dialogs.InputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AeroPlayer.Views.Dialogs"
+        mc:Ignorable="d"
+        Title="InputDialog" >
+    <StackPanel>
+        <TextBlock x:Name="MessageBlock"></TextBlock>
+        <TextBox x:Name="ResponseBox"></TextBox>
+        <Button Content="Ok" Click="Button_Click"></Button>
+    </StackPanel>
+</Window>

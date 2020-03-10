@@ -105,7 +105,7 @@ namespace AeroPlayer.ViewModels
             {
                 return new DelegateCommand(() =>
                 {
-                    player.PlayNextSong(false);
+                    player.SongManager.NextSong(false);
                 });
             }
         }
@@ -120,7 +120,7 @@ namespace AeroPlayer.ViewModels
                     try
                     {
 
-                        player.PauseToggle();
+                        player.AudioPauseToggleStatus();
 
                     }
                     catch (NullReferenceException e)
