@@ -95,7 +95,8 @@ namespace AeroPlayer.Services.YoutubeParser
                     var thumbNailNode = node.SelectSingleNode("div[@class='yt-lockup-thumbnail contains-addto']/a/div/span/img");
                     if (thumbNailNode == null)
                     {
-                        File.AppendAllText("results.html", node.InnerHtml + "\n<br/>");
+                       // debug invalid results 
+                       // File.AppendAllText("results.html", node.InnerHtml + "\n<br/>");
                         continue; // SKIP RESULT
                     }
 
