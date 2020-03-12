@@ -1,8 +1,7 @@
-﻿using AeroPlayer.Services.YoutubeParser;
+﻿using AeroPlayer.Models;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.Linq;
 using static AeroPlayer.Services.YoutubeParser.YoutubeParser;
 
 namespace AeroPlayer.ViewModels
@@ -22,29 +21,42 @@ namespace AeroPlayer.ViewModels
                 onPropertyChanged("Url");
             }
         }
+
         public ObservableCollection<YoutubeResult> YoutubeResults { get; set; } = new ObservableCollection<YoutubeResult>();
 
-        public ObservableCollection<string> Urls { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<Tuple<string, string>> Urls { get; set; } = new ObservableCollection<Tuple<string, string>>();
         public DelegateCommand AddUrl { get; }
         public DelegateCommand SearchUrl { get; }
+        public DelegateCommand<YoutubeResult> Download { get; }
+
         public void AddUrlDelegate()
         {
-            Urls.Add("");
+
         }
-        public void SearchUrlDelegate()
+        public async void SearchUrlDelegate()
         {
             YoutubeResults.Clear();
-            var results = GetYoutubeQuery(Url);
-            for(int  i= 0; i < results.Count; i++)
+            var results = await GetYoutubeQuery(Url);
+            for (int i = 0; i < results.Count; i++)
             {
-                Console.WriteLine(results[i].ImageOutput);
                 YoutubeResults.Add(results[i]);
             }
+
+        }
+        public void DownloadDelegate(object sender)
+        {
+            var youtubeResult = (YoutubeResult)sender;
+
+            if (Urls.Any(url => url.Item1 == youtubeResult.Url))
+                return;
+            Urls.Add(Tuple.Create(youtubeResult.Url, youtubeResult.Title));
+
         }
         public YoutubeDownloaderViewModel()
         {
             AddUrl = new DelegateCommand(AddUrlDelegate);
             SearchUrl = new DelegateCommand(SearchUrlDelegate);
+            Download = new DelegateCommand<YoutubeResult>(DownloadDelegate);
 
         }
 

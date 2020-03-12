@@ -5,6 +5,34 @@ using System.Windows.Input;
 
 namespace AeroPlayer.ViewModels
 {
+    public class DelegateCommand<T> : ICommand
+    {
+
+
+        private readonly Action<T> _action;
+
+        public DelegateCommand(Action<T> action)
+        {
+            _action = action;
+        }
+
+        public void Execute(object parameter)
+        {
+            _action((T)parameter);
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+
+     
+
+#pragma warning disable 67
+        public event EventHandler CanExecuteChanged;
+#pragma warning restore 67
+
+    }
     public class DelegateCommand : ICommand
     {
 

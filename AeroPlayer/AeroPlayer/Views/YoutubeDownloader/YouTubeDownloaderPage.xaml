@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -18,23 +18,31 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" ItemsSource="{Binding Urls}">
-
+        <ListBox MinWidth="200" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" ItemsSource="{Binding Urls}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel>
+                        <TextBlock Text="{Binding Path=Item2}"></TextBlock></DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
 
         </ListBox>
 
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url}"></TextBox>
         <Button Grid.Row="0" Grid.Column="2" Command="{Binding SearchUrl }">Search Url</Button>
-        <ListBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding YoutubeResults}">
+        <ListBox x:Name="YoutubeList" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding YoutubeResults}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
                         <DockPanel>
                             <Image  Grid.Row="1" Source="{Binding ImageOutput}" Width="120" Height="120"  Margin="0,0,0,0" d:LayoutOverrides="Width"/>
+                            
                             <TextBlock Grid.Row="0" TextAlignment="Center" Text="{Binding Title}" FontSize="20"></TextBlock>
-
+                       
 
                         </DockPanel>
+                        <Button Height="50" x:Name="btn"  Content="Download" HorizontalAlignment="Left"
+                                    Command="{Binding Path=DataContext.Download, ElementName=YoutubeList}"  CommandParameter="{Binding  }"></Button>
 
                     </StackPanel>
                 </DataTemplate>

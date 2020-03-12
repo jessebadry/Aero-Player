@@ -8,9 +8,7 @@ namespace AeroPlayerService
 {
     public class YouTubeDownloader
     {
-
-    
-        static string YoutubeDownloaderPath = "MusicPlayer/Downloader";
+        static readonly string YoutubeDownloaderPath = "MusicPlayer/Downloader";
         public static List<string> DownloadSongs(string[] urls, string output)
         {
 

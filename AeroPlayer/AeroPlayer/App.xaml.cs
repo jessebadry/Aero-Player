@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AeroPlayer.Services.YoutubeParser;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,11 @@ namespace AeroPlayer
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            
+
+        }
+
     }
 }

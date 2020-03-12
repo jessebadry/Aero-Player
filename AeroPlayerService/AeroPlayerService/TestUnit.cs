@@ -12,8 +12,8 @@ namespace AeroPlayerService
             {
 
                 var player = new MusicPlayer();
-                player.PlayNextSong(true);
-                player.PauseToggle();
+                player.SongManager.NextSong(true);
+                player.AudioPauseToggleStatus();
                 while (true)
                 {
                     string line = Console.ReadLine();
