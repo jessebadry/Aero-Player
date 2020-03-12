@@ -116,6 +116,7 @@ namespace AeroPlayer.ViewModels
                     }
 
                 }
+                //Replacing old playlist with new one, as new one contains new songs.
                 PlayLists[index] = playlist;
                 onPropertyChanged("PlayLists");
 
