@@ -2,11 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:AeroPlayer"
                     xmlns:Views="clr-namespace:AeroPlayer.Views"
+                    xmlns:YoutubeViews="clr-namespace:AeroPlayer.Views.YoutubeDownloader"
              xmlns:ViewModels="clr-namespace:AeroPlayer.ViewModels"
                     >
 
     <Views:SongSelection x:Key="SongSelect"/>
+    <YoutubeViews:YouTubeDownloaderPage x:Key="YoutubeDownloaderView"/>
     <ViewModels:MainViewModel x:Key="MainViewModel"/>
+    <ViewModels:YoutubeDownloaderViewModel x:Key="YoutubeDownloaderViewModel"/>
     <ViewModels:SongSelectionViewModel x:Key="SongSelectionViewModel"/>
     <Style x:Key="MusicPlayerButton" TargetType="{x:Type Button}" >
         <Setter Property="Foreground" Value="White"></Setter>

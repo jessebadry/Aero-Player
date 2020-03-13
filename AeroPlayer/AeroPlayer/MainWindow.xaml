@@ -23,6 +23,7 @@
                 <ContentControl   HorizontalAlignment="Stretch" Content="{StaticResource ResourceKey=SongSelect}"></ContentControl>
             </TabItem>
             <TabItem Header="Youtube Downloader">
+                <ContentControl HorizontalAlignment="Stretch" Content="{StaticResource ResourceKey=YoutubeDownloaderView}"></ContentControl>
             </TabItem>
             
         </TabControl>

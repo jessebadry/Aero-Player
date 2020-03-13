@@ -3,11 +3,11 @@
                     xmlns:local="clr-namespace:AeroPlayer.WPFControls">
     <DataTemplate x:Key="SongList" >
 
-        <ListBox x:Name="List"   SelectedItem="{Binding Path=DataContext.Song,Mode=TwoWay,  ElementName=PlayListContentControl}"  ItemsSource="{Binding Songs}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
+        <ListBox x:Name="TheList"   SelectedItem="{Binding Path=DataContext.Song,Mode=TwoWay,  ElementName=PlayListContentControl}"  ItemsSource="{Binding Songs}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
                     <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
                             <Setter Property="IsSelected" Value="True"></Setter>
                         </Trigger>
                     </Style.Triggers>
@@ -16,9 +16,12 @@
             </ListBox.Resources>
             <ListBox.ItemTemplate>
                 <DataTemplate>
+
                     <DockPanel>
+                        
                         <Button Command="{Binding Path=DataContext.LoadSong, ElementName=PlayListContentControl}">Load</Button>
-                        <TextBlock TextAlignment="Center" FontSize="20" Foreground="Black"  Text="{Binding Path=SongDisplay}"></TextBlock>
+                        <Button Command="{Binding Path=DataContext.ChangeSong, ElementName=PlayListContentControl}" >Change</Button>
+                        <TextBox TextAlignment="Center" FontSize="20" Foreground="Black"  Text="{Binding Path=SongDisplay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     </DockPanel>
 
                 </DataTemplate>

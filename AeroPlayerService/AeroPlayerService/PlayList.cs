@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace AeroPlayerService
 {
@@ -9,11 +8,7 @@ namespace AeroPlayerService
     public class PlayList : PropertyObject
     {
         private int current_index;
-
-
-        public List<string> Songs { get; set; }
-
-
+        public List<Song> Songs { get; set; }
         public int CurrentIndex
         {
             get
@@ -27,23 +22,25 @@ namespace AeroPlayerService
                 onPropertyChanged("CurrentSong");
             }
         }
-        public string PlayListDisplay { get; set; }
-        private string name;
+        public string DisplayName
+        {
+            get
+            {
+                return Path.GetFileNameWithoutExtension(AbsoluteName);
+            }
+        }
+        private string absoluteName;
         public string AbsoluteName
         {
             get
             {
-
-                return name;
+                return absoluteName;
             }
             set
             {
-                name = value;
-                PlayListDisplay = Path.GetFileName(value);
-
-
-
+                absoluteName = value;
             }
+           
         }
         public string CurrentSong
         {
@@ -51,7 +48,7 @@ namespace AeroPlayerService
             {
                 if (!ValidSongIndex(CurrentIndex))
                     return null;
-                return Songs[CurrentIndex];
+                return Songs[CurrentIndex].AbsoluteName;
             }
             set
             {
@@ -60,28 +57,62 @@ namespace AeroPlayerService
 
         }
         private bool ValidSongIndex(int index) => (index <= Songs.Count - 1 && index >= 0);
-
-        //String version of SetSongIndex
-        public void SetCurentSong(string song)
+        public static string CreateValidSongPath(string playlistName, string SongRelativeName)
         {
-            Console.WriteLine("Song = " + song + " Song COunt = " + Songs.Count);
-            int new_index = Songs.IndexOf(song);
-            if (ValidSongIndex(new_index))
+            return Path.Join(MusicManager.MusicPlayerPath, playlistName, SongRelativeName + ".mp3");
+        }
+        //String version of SetSongIndex
+        public void SetCurrentSong(Song song)
+        {
+            int index = Songs.IndexOf(song);
+            SetSongByIndex(index);
+        }
+        private void SetSongByIndex(int newIndex)
+        {
+            if (ValidSongIndex(newIndex))
             {
-                CurrentIndex = new_index;
+                CurrentIndex = newIndex;
             }
             else
             {
-                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", AbsoluteName, new_index));
+                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", AbsoluteName, newIndex));
             }
         }
-        public void changeSongName(string name, int index)
+        private int GetIndexOfSong(string song) => Songs.FindIndex(s => s.AbsoluteName == song);
+        public void SetCurrentSong(string song)
         {
-            Songs[index] = name;
+            int newIndex = GetIndexOfSong(song);
+            SetSongByIndex(newIndex);
+        }
+        public bool ChangeSongName(string oldSongDisplay, string newSong)
+        {
+
+            string oldSongAbsolute = CreateValidSongPath(DisplayName, oldSongDisplay);
+            int index = GetIndexOfSong(oldSongAbsolute);
+            if (ValidSongIndex(index))
+            {
+                string oldSongName = Songs[index].AbsoluteName;
+                try
+                {
+                    string newSongName = CreateValidSongPath(DisplayName, newSong); ;
+                    File.Move(oldSongName, newSongName);
+                    Songs[index] = new Song(newSongName, AbsoluteName);
+                }
+                catch (IOException e)
+                {
+                    return false;
+                }
+
+
+                return true;
+            }
+
+            return false;
+
         }
         public void SetSongIndex(int index)
         {
-            Console.WriteLine("new index == " + index);
+            
             if (ValidSongIndex(index))
             {
                 //Change Low level index of songs so next time current song is retrieved, songs will start from the beginning of the playlist.
@@ -96,43 +127,34 @@ namespace AeroPlayerService
         }
         public bool NextSong(bool next)
         {
-
             if (CurrentIndex == Songs.Count - 1 && next)
             {
-
                 CurrentIndex = 0;
-
                 return true;
             }
             else if (CurrentIndex == 0 && !next)
             {
-
                 CurrentIndex = Songs.Count - 1;
                 return true;
             }
             else if (next)
             {
-
                 CurrentIndex++;
-
             }
             else
             {
                 CurrentIndex--;
             }
-
             return false;
         }
-
         public PlayList()
         {
-
             current_index = -1;
-
-
         }
-
-
+        public PlayList(string playListAbsoluteName) : this()
+        {
+            this.absoluteName = playListAbsoluteName;
+        }
     }
 
 }

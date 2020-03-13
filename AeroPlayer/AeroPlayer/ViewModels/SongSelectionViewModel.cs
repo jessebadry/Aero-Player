@@ -1,18 +1,16 @@
 ﻿using AeroPlayerService;
 using Microsoft.Win32;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows.Input;
+using AeroPlayer.Views.Dialogs;
 
 namespace AeroPlayer.ViewModels
 {
     public class SongSelectionViewModel : PropertyObject
     {
-        PlayListDetail currentPlaylist;
-        public PlayListDetail CurrentPlayList
+        PlayList currentPlaylist;
+        public PlayList CurrentPlayList
         {
 
             get
@@ -22,13 +20,13 @@ namespace AeroPlayer.ViewModels
             }
             set
             {
-
+               
                 currentPlaylist = value;
                 onPropertyChanged("CurrentPlayList");
             }
         }
-        ObservableCollection<PlayListDetail> playLists;
-        public ObservableCollection<PlayListDetail> PlayLists
+        ObservableCollection<PlayList> playLists;
+        public ObservableCollection<PlayList> PlayLists
         {
             get => playLists;
             set
@@ -37,10 +35,12 @@ namespace AeroPlayer.ViewModels
                 onPropertyChanged("PlayLists");
             }
         }
-        private SongDetail song;
-        public SongDetail Song { get => song; set { song = value; onPropertyChanged("Song"); } }
+        private Song song;
+        public Song Song { get => song; set { song = value; onPropertyChanged("Song"); } }
         DelegateCommand LoadSongCommand;
         DelegateCommand AddSongCommand;
+        DelegateCommand AddPlayListCommand;
+        DelegateCommand ChangeSongCommand;
 
         public ICommand LoadSong
         {
@@ -53,6 +53,24 @@ namespace AeroPlayer.ViewModels
             }
 
         }
+        public ICommand ChangeSong
+        {
+            get
+            {
+
+
+                return ChangeSongCommand;
+
+            }
+
+        }
+        public ICommand AddPlaylist
+        {
+            get
+            {
+                return AddPlayListCommand;
+            }
+        }
         public ICommand AddSong
         {
             get
@@ -60,22 +78,53 @@ namespace AeroPlayer.ViewModels
                 return AddSongCommand;
             }
         }
+        public void AddPlayListDelegate()
+        {
+            var newPlaylist = player.SongManager.CreateNewPlayList(RunInputDialog("Enter new playlist name"));
+            PlayLists.Add(newPlaylist);
+
+        }
+        public void ChangeSongDelegate()
+        {
+            string name = RunInputDialog("Enter new name for song");
+            this.Song.SongDisplay = name;
+        }
+        private string RunInputDialog(string message)
+        {
+            string output =  null;
+            var dialog = new InputDialog(message);
+            if (dialog.ShowDialog() == true)
+            {
+                output = dialog.ResponseBox.Text;
+            }
+            return output;
+        }
         private void AddSongDelegate()
         {
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Multiselect = true;
-            fileDialog.Filter = "Mp3 Files (*.mp3)|*.mp3";
+            string playlist;
+
+
+            if (player.SongManager.CurrentPlayList == null)
+            {
+                playlist = RunInputDialog("Enter new playlist name" );
+            }
+            else
+            {
+                playlist = this.CurrentPlayList.DisplayName;
+            }
+            OpenFileDialog fileDialog = new OpenFileDialog
+            {
+                Multiselect = true,
+                Filter = "Mp3 Files (*.mp3)|*.mp3"
+            };
 
 
             if (fileDialog.ShowDialog() == true)
             {
                 string[] filenames = fileDialog.FileNames;
-                string playlist = this.CurrentPlayList.DisplayName;
 
-              
-
-               bool worked =  player.SongManager.AddSongs(playlist, filenames);
-               if (worked)
+                bool worked = player.SongManager.AddSongs(playlist, filenames);
+                if (worked)
                 {
                     Console.WriteLine("Success");
 
@@ -91,20 +140,16 @@ namespace AeroPlayer.ViewModels
         {
             if (Song == null)
                 return;
-            player.SongManager.SetSong(Song.PlayListName, Song.SongName);
+            player.SongManager.SetCurrentlyPlaying(Song.PlayListName, Song.AbsoluteName);
         }
 
         private static MusicPlayer player;
 
-
-        public SongSelectionViewModel()
+        private void AddSongChangeDelegate()
         {
-            player = MainViewModel.player;
-            LoadSongCommand = new DelegateCommand(LoadSongDelegate);
-            AddSongCommand = new DelegateCommand(AddSongDelegate);
-            player.SongManager.OnAddSong += delegate (object sender, PlayListDetail playlist)
+            player.SongManager.OnAddSong += delegate (object sender, PlayList playlist)
             {
-                Console.WriteLine("delegate...");
+                
                 int index = 0;
                 for (int i = 0; i < PlayLists.Count; i++)
                 {
@@ -116,13 +161,28 @@ namespace AeroPlayer.ViewModels
                     }
 
                 }
-                //Replacing old playlist with new one, as new one contains new songs.
-                PlayLists[index] = playlist;
+
+                Console.WriteLine("index = " + index);
+
+                if (index > PlayLists.Count - 1)
+                    PlayLists.Add(playlist);
+                else
+                    PlayLists[index] = playlist;
+
                 onPropertyChanged("PlayLists");
 
 
             };
-            PlayLists = new ObservableCollection<PlayListDetail>(player.SongManager.GetPlayListDetails());
+        }
+        public SongSelectionViewModel()
+        {
+            player = MainViewModel.player;
+            ChangeSongCommand = new DelegateCommand(ChangeSongDelegate);
+            LoadSongCommand = new DelegateCommand(LoadSongDelegate);
+            AddSongCommand = new DelegateCommand(AddSongDelegate);
+            AddPlayListCommand = new DelegateCommand(AddPlayListDelegate);
+            AddSongChangeDelegate();
+            PlayLists = new ObservableCollection<PlayList>(player.SongManager.PlayLists);
 
         }
 
