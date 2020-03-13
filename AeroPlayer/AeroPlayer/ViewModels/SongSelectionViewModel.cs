@@ -161,12 +161,14 @@ namespace AeroPlayer.ViewModels
                     }
 
                 }
+
                 Console.WriteLine("index = " + index);
 
                 if (index > PlayLists.Count - 1)
                     PlayLists.Add(playlist);
                 else
                     PlayLists[index] = playlist;
+
                 onPropertyChanged("PlayLists");
 
 
