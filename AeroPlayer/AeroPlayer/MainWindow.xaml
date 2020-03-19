@@ -32,7 +32,7 @@
                 <TextBlock.Text>
                     <Binding Path="CurrentSong">
                         <Binding.StringFormat>
-                            Currently Playing: {0}
+                           {0}
                         </Binding.StringFormat>
                     </Binding>
                 </TextBlock.Text>

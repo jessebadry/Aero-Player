@@ -6,54 +6,34 @@ namespace AeroPlayerService
 {
     public class Song : PropertyObject
     {
-        public string AbsoluteName { get; set; }
+        public string RelativePath { get; set; }
 
         public string SongDisplay
         {
             get
             {
-                return Path.GetFileNameWithoutExtension(AbsoluteName);
+                return Path.GetFileNameWithoutExtension(RelativePath);
 
             }
             set
             {
-                string playlistName = Path.GetFileNameWithoutExtension(PlayListName);
+                string playlistName = Path.GetFileNameWithoutExtension(RelativePlayListPath);
                 bool worked = MusicManager.Instance.ChangeSongName(playlistName, SongDisplay, value);
 
                 if (worked)
                 {
-                    AbsoluteName = PlayList.CreateValidSongPath(playlistName, value);
+                    RelativePath = PlayList.CreateValidSongPath(playlistName, value);
                     onPropertyChanged("SongDisplay");
                 }
             }
         }
-        public string PlayListName { get; }
+        public string RelativePlayListPath { get; }
         public Song(string songName, string playListName)
         {
-            this.AbsoluteName = songName;
-            PlayListName = playListName;
+            RelativePath = songName;
+            RelativePlayListPath = playListName;
 
         }
     }
-    public class PlayListDetail
-    {
-        public string DisplayName
-        {
-            get
-            {
-                return Path.GetFileNameWithoutExtension(AbsoluteName);
-            }
-        }
-        public string AbsoluteName { get; set; }
-        public List<Song> Songs { get; set; }
-        public PlayListDetail(PlayList pl)
-        {
-            if (pl == null)
-                throw new ArgumentNullException("PlayList cannot be null!");
 
-            Songs = pl.Songs;
-            AbsoluteName = pl.AbsoluteName;
-        }
-
-    }
 }

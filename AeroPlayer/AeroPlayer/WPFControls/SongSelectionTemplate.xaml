@@ -2,7 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:AeroPlayer.WPFControls">
     <DataTemplate x:Key="SongList" >
-
         <ListBox x:Name="TheList"   SelectedItem="{Binding Path=DataContext.Song,Mode=TwoWay,  ElementName=PlayListContentControl}"  ItemsSource="{Binding Songs}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
@@ -20,8 +19,8 @@
                     <DockPanel>
                         
                         <Button Command="{Binding Path=DataContext.LoadSong, ElementName=PlayListContentControl}">Load</Button>
-                        <Button Command="{Binding Path=DataContext.ChangeSong, ElementName=PlayListContentControl}" >Change</Button>
-                        <TextBox TextAlignment="Center" FontSize="20" Foreground="Black"  Text="{Binding Path=SongDisplay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <Button Command="{Binding Path=DataContext.DeleteSong, ElementName=PlayListContentControl}"  CommandParameter="{Binding }">Delete</Button>
+                        <TextBox TextAlignment="Center" FontSize="20" Foreground="Black"  Text="{Binding Path=SongDisplay}"></TextBox>
                     </DockPanel>
 
                 </DataTemplate>

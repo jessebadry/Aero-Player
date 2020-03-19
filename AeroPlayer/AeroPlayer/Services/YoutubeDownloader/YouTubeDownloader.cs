@@ -1,5 +1,6 @@
 ﻿using MediaToolkit;
 using MediaToolkit.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using VideoLibrary;
@@ -8,33 +9,50 @@ namespace AeroPlayerService
 {
     public class YouTubeDownloader
     {
-        static readonly string YoutubeDownloaderPath = "MusicPlayer/Downloader";
+        static readonly string YoutubeDownloaderPath = "MusicPlayer/DownloaderTemp/";
         public static List<string> DownloadSongs(string[] urls, string output)
         {
 
 
             var youtube = YouTube.Default;
             var results = new List<string>();
+            Directory.CreateDirectory(YoutubeDownloaderPath);
+
             foreach (string url in urls)
             {
+
                 var vid = youtube.GetVideo(url);
-                File.WriteAllBytes(Path.Join(YoutubeDownloaderPath, vid.FullName), vid.GetBytes());
+                string mp4Path = Path.Join(YoutubeDownloaderPath, vid.FullName);
+                File.WriteAllBytes(mp4Path, vid.GetBytes());
 
                 var inputFile = new MediaFile { Filename = YoutubeDownloaderPath + vid.FullName };
 
-                string outputName = Path.Join(output, Path.GetFileNameWithoutExtension(vid.FullName));
+                string outputName = Path.Join(output, Path.GetFileNameWithoutExtension(vid.FullName))+".mp3";
 
-                results.Add(outputName);
-
-                var outputFile = new MediaFile { Filename = $"{outputName}.mp3" };
-
-                using (var engine = new Engine())
+                bool invalid = false;
+                try
                 {
-                    engine.GetMetadata(inputFile);
+                    var outputFile = new MediaFile { Filename = outputName };
 
-                    engine.Convert(inputFile, outputFile);
+                    using (var engine = new Engine())
+                    {
+                        engine.GetMetadata(inputFile);
+
+                        engine.Convert(inputFile, outputFile);
+                    }
+                    
                 }
+                catch (Exception e) {
+                    Console.WriteLine(e);
+                    invalid = true; }
+
+
+                if (!invalid)
+                    results.Add(outputName);
+
             }
+            GC.Collect();
+
             return results;
         }
         public static void GetSong(string url)

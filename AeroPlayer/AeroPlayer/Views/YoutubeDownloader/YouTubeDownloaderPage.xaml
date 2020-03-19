@@ -17,20 +17,29 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <ListBox MinWidth="200" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" ItemsSource="{Binding Urls}">
+        <ListBox MinWidth="200"  Grid.Row="0" x:Name="UrlsList" Grid.RowSpan="2" SelectedItem="{Binding SelectedSong}" Grid.Column="0" ItemsSource="{Binding Urls}">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete Item" Command="{Binding Path=DeleteSong}" >
+                    </MenuItem>
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemTemplate>
+                
                 <DataTemplate>
                     <DockPanel>
-                        <TextBlock Text="{Binding Path=Item2}"></TextBlock></DockPanel>
+                        <TextBlock Text="{Binding Path=Item2}"></TextBlock>
+                    </DockPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
 
         </ListBox>
-
+        <Button Content="Downloaded Selected" Command="{Binding DownloadUrls}" Grid.Row="2"></Button>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url}"></TextBox>
-        <Button Grid.Row="0" Grid.Column="2" Command="{Binding SearchUrl }">Search Url</Button>
-        <ListBox x:Name="YoutubeList" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding YoutubeResults}">
+        <Button Grid.Row="0" Grid.Column="2" Command="{Binding SearchUrl}">Search Url</Button>
+        <ListBox x:Name="YoutubeList" Grid.RowSpan="2"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding YoutubeResults}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
@@ -42,7 +51,7 @@
 
                         </DockPanel>
                         <Button Height="50" x:Name="btn"  Content="Download" HorizontalAlignment="Left"
-                                    Command="{Binding Path=DataContext.Download, ElementName=YoutubeList}"  CommandParameter="{Binding  }"></Button>
+                                    Command="{Binding Path=DataContext.AddSelection, ElementName=YoutubeList}"  CommandParameter="{Binding  }"></Button>
 
                     </StackPanel>
                 </DataTemplate>

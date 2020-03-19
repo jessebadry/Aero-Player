@@ -4,6 +4,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using AeroPlayer.Views.Dialogs;
+using System.Linq;
+using AeroPlayer.Services.MusicPlayerGuiLayer;
+using System.Diagnostics;
+using System.IO;
 
 namespace AeroPlayer.ViewModels
 {
@@ -20,7 +24,7 @@ namespace AeroPlayer.ViewModels
             }
             set
             {
-               
+
                 currentPlaylist = value;
                 onPropertyChanged("CurrentPlayList");
             }
@@ -28,19 +32,25 @@ namespace AeroPlayer.ViewModels
         ObservableCollection<PlayList> playLists;
         public ObservableCollection<PlayList> PlayLists
         {
-            get => playLists;
-            set
-            {
-                playLists = value;
-                onPropertyChanged("PlayLists");
-            }
+            get => MainViewModel.player.PlayLists;
+            //set
+            //{
+            //    playLists = value;
+            //    onPropertyChanged("PlayLists");
+            //}
         }
-        private Song song;
+        Song song;
+        MusicManager SongManager;
         public Song Song { get => song; set { song = value; onPropertyChanged("Song"); } }
         DelegateCommand LoadSongCommand;
         DelegateCommand AddSongCommand;
         DelegateCommand AddPlayListCommand;
         DelegateCommand ChangeSongCommand;
+        public DelegateCommand<PlayList> ChangePlayList { get; }
+        public DelegateCommand<PlayList> DeletePlayList { get; }
+        public DelegateCommand<Song> DeleteSong { get; }
+        public DelegateCommand<PlayList> OpenPlaylistFolder { get; }
+        private static Player player;
 
         public ICommand LoadSong
         {
@@ -64,6 +74,8 @@ namespace AeroPlayer.ViewModels
             }
 
         }
+
+
         public ICommand AddPlaylist
         {
             get
@@ -80,37 +92,53 @@ namespace AeroPlayer.ViewModels
         }
         public void AddPlayListDelegate()
         {
-            var newPlaylist = player.SongManager.CreateNewPlayList(RunInputDialog("Enter new playlist name"));
-            PlayLists.Add(newPlaylist);
+            string playlistName = RunInputDialog("Enter new playlist name", "PlayList Change");
+            if (!string.IsNullOrEmpty(playlistName))
+            {
+                var newPlaylist = SongManager.CreateNewPlayList(playlistName);
+                PlayLists.Add(newPlaylist);
+            }
+
 
         }
         public void ChangeSongDelegate()
         {
-            string name = RunInputDialog("Enter new name for song");
+            string name = RunInputDialog("Enter new name for song", "Song Change");
             this.Song.SongDisplay = name;
         }
-        private string RunInputDialog(string message)
+
+
+        private string RunInputDialog(string message, string title)
         {
-            string output =  null;
+            string output = null;
             var dialog = new InputDialog(message);
+            dialog.Title = title;
             if (dialog.ShowDialog() == true)
             {
                 output = dialog.ResponseBox.Text;
             }
             return output;
         }
+        public void DeleteSongDelegate(Song song)
+        {
+            Console.WriteLine("Deleting song..");
+            SongManager.DeleteSong(song.RelativePlayListPath, song.RelativePath);
+        }
+        public void DeletePlayListDelegate(PlayList PlayList)
+        {
+           
+            SongManager.DeletePlaylist(PlayList.DisplayName);
+        }
         private void AddSongDelegate()
         {
             string playlist;
-
-
-            if (player.SongManager.CurrentPlayList == null)
+            if (SongManager.CurrentPlayList == null)
             {
-                playlist = RunInputDialog("Enter new playlist name" );
+                playlist = RunInputDialog("Enter new playlist name", "Create PlayList Name");
             }
             else
             {
-                playlist = this.CurrentPlayList.DisplayName;
+                playlist = CurrentPlayList.DisplayName;
             }
             OpenFileDialog fileDialog = new OpenFileDialog
             {
@@ -119,15 +147,14 @@ namespace AeroPlayer.ViewModels
             };
 
 
-            if (fileDialog.ShowDialog() == true)
+            if (fileDialog.ShowDialog().Value)
             {
                 string[] filenames = fileDialog.FileNames;
 
-                bool worked = player.SongManager.AddSongs(playlist, filenames);
+                bool worked = SongManager.AddSongs(playlist, filenames);
                 if (worked)
                 {
                     Console.WriteLine("Success");
-
                 }
                 else
                 {
@@ -140,49 +167,43 @@ namespace AeroPlayer.ViewModels
         {
             if (Song == null)
                 return;
-            player.SongManager.SetCurrentlyPlaying(Song.PlayListName, Song.AbsoluteName);
+            SongManager.SetCurrentlyPlaying(Song.RelativePlayListPath, Song.RelativePath);
         }
-
-        private static MusicPlayer player;
-
+        private void ChangePlayListDelegate(PlayList oldplaylist)
+        {
+            string newName = RunInputDialog("Enter new playlist name", "Change PlayList name");
+            SongManager.ChangePlaylistName(oldplaylist.DisplayName, newName);
+        }
+        private void OpenPlaylistFolderDelegate(PlayList playlist)
+        {
+            Process.Start("explorer.exe", Path.GetFullPath(playlist.RelativePathName));
+        }
         private void AddSongChangeDelegate()
         {
-            player.SongManager.OnAddSong += delegate (object sender, PlayList playlist)
-            {
-                
-                int index = 0;
-                for (int i = 0; i < PlayLists.Count; i++)
-                {
-                    if (PlayLists[i].DisplayName == playlist.DisplayName)
-                    {
 
-                        index = i;
-                        break;
-                    }
+            SongManager.OnPlaylistChange += SongManager_OnPlaylistChange;
 
-                }
-
-                Console.WriteLine("index = " + index);
-
-                if (index > PlayLists.Count - 1)
-                    PlayLists.Add(playlist);
-                else
-                    PlayLists[index] = playlist;
-
-                onPropertyChanged("PlayLists");
-
-
-            };
         }
+
+        private void SongManager_OnPlaylistChange(object sender, PlayList playlist, bool delete)
+        {
+
+        }
+
         public SongSelectionViewModel()
         {
             player = MainViewModel.player;
+            SongManager = player.player.SongManager;
             ChangeSongCommand = new DelegateCommand(ChangeSongDelegate);
             LoadSongCommand = new DelegateCommand(LoadSongDelegate);
             AddSongCommand = new DelegateCommand(AddSongDelegate);
             AddPlayListCommand = new DelegateCommand(AddPlayListDelegate);
+            DeletePlayList = new DelegateCommand<PlayList>(DeletePlayListDelegate);
+            DeleteSong = new DelegateCommand<Song>(DeleteSongDelegate);
+            ChangePlayList = new DelegateCommand<PlayList>(ChangePlayListDelegate);
+            OpenPlaylistFolder = new DelegateCommand<PlayList>(OpenPlaylistFolderDelegate);
+
             AddSongChangeDelegate();
-            PlayLists = new ObservableCollection<PlayList>(player.SongManager.PlayLists);
 
         }
 

@@ -10,6 +10,9 @@
     <Compile Update="Views\Dialogs\InputDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Dialogs\SongDownloadDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\SongSelection.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -19,6 +22,9 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Dialogs\InputDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Dialogs\SongDownloadDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SongSelection.xaml">

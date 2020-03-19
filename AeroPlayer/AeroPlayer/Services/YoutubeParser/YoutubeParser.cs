@@ -15,46 +15,39 @@ namespace AeroPlayer.Services.YoutubeParser
 {
     public static class YoutubeParser
     {
+  
+        public delegate void ErrorEvent(string error);
+        public static event ErrorEvent ErrorEventHandler;
+        private static void OnError(string error)
+        {
+            ErrorEventHandler?.Invoke(error);
 
-
+        }
         static readonly string output = "YoutubeDownloader/Images";
 
-        static bool Initialized = false;
-
         static WebClient webclient;
-        static string GetUrlHtml(string url)
-        {
-
-            using var client = new WebClient();
-            client.Encoding = System.Text.Encoding.UTF8;
-            return client.DownloadString(url);
-        }
-        static YoutubeParser()
-        {
-
-
-        }
-
 
         public static async Task<string> getContentFromUrl(String Url)
         {
             try
             {
-                webclient = new WebClient();
-                webclient.Encoding = Encoding.UTF8;
-
+                webclient = new WebClient
+                {
+                    Encoding = Encoding.UTF8
+                };
+                webclient.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; " +
+                                   "Windows NT 5.2; .NET CLR 1.0.3705;)");
                 Task<string> downloadStringTask = webclient.DownloadStringTaskAsync(new Uri(Url));
                 var content = await downloadStringTask;
-
-                webclient.DownloadStringAsync(new Uri(Url));
 
                 return content.Replace('\r', ' ').Replace('\n', ' ');
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                Console.WriteLine(ex.ToString());
+                OnError(ex.ToString());
             }
-
+            return null;
         }
         private static bool AttributesHasKey(string key, ref HtmlAttributeCollection htmlAttributes)
         {
@@ -63,11 +56,14 @@ namespace AeroPlayer.Services.YoutubeParser
         private static void AssignNonNullAttribute(ref string output, HtmlAttributeCollection attrs, params string[] allowedKeys)
         {
             if (attrs == null)
-                throw new ArgumentNullException("Attributes Collection is null!");
+            {
+                OnError("Attributes Collection is null!");
+                return;
+            }
+                
+
             for (int i = 0; i < allowedKeys.Length; i++)
             {
-
-
                 if (AttributesHasKey(allowedKeys[i], ref attrs))
                 {
                     output = attrs[allowedKeys[i]].Value;
@@ -78,27 +74,32 @@ namespace AeroPlayer.Services.YoutubeParser
 
         public static async Task<List<YoutubeResult>> GetYoutubeQuery(string query)
         {
+       
             var youtubeResults = new List<YoutubeResult>();
             try
             {
                 string url = "https://www.youtube.com/results?search_query=" + query;
                 string htmlText = await getContentFromUrl(url);
-
                 var html = new HtmlDocument();
                 html.LoadHtml(htmlText);
-                var nodes = html.DocumentNode.SelectNodes("//div[@class='yt-lockup-dismissable yt-uix-tile']");
-
-                for (int i = 0; i < nodes.Count; i++)
+                
+                var youtubeResultNodes = html.DocumentNode.SelectNodes("//div[@class='yt-lockup-dismissable yt-uix-tile']");
+                if (youtubeResultNodes == null)
                 {
-                    var node = nodes[i];
+                    Console.WriteLine("Could not load query..");
+                    OnError("Could not load query");
+                  
+                    return null;
+                }
+
+                //Iterate all youtube results
+                for (int i = 0; i < youtubeResultNodes.Count; i++)
+                {
+                    var node = youtubeResultNodes[i];
 
                     var thumbNailNode = node.SelectSingleNode("div[@class='yt-lockup-thumbnail contains-addto']/a/div/span/img");
                     if (thumbNailNode == null)
-                    {
-                       // debug invalid results 
-                       // File.AppendAllText("results.html", node.InnerHtml + "\n<br/>");
                         continue; // SKIP RESULT
-                    }
 
                     var imgAttrs = thumbNailNode.Attributes;
 
@@ -107,13 +108,9 @@ namespace AeroPlayer.Services.YoutubeParser
 
                     //If doesn't start with https, it is an invalid link, and also means that the img url is under 'data-thumb'  instead.
                     if (AttributesHasKey("src", ref imgAttrs) && imgAttrs["src"].Value.StartsWith("https"))
-                    {
                         imgSrc = imgAttrs["src"].Value;
-                    }
                     else if (AttributesHasKey("data-thumb", ref imgAttrs))
-                    {
                         imgSrc = imgAttrs["data-thumb"].Value;
-                    }
                     else continue;
 
                     //Get Node of detail content, title, url, views, description ect.
@@ -122,13 +119,16 @@ namespace AeroPlayer.Services.YoutubeParser
                     //<a> tag contains video title and the end part of the video url, EX: '/watch?v=ID'
                     var videoATag = detailsNode.SelectSingleNode("h3/a");
 
-                    string title = videoATag.Attributes["title"].Value;
+                    string title = videoATag.InnerText;
 
                     //Creating FULL youtube link.
                     string youtubeUrl = "https://www.youtube.com" + videoATag.Attributes["href"].Value;
 
                     //Get Views
-                    string views = detailsNode.SelectSingleNode("(div[@class='yt-lockup-meta ']/ul/li)[2]").InnerText;
+                    var viewsNode = detailsNode.SelectSingleNode("(div[@class='yt-lockup-meta ']/ul/li)[2]");
+
+
+                    string views = viewsNode == null ? "" : viewsNode.InnerText;
 
                     //Compile strings to Result object.
                     var result = new YoutubeResult
@@ -147,25 +147,29 @@ namespace AeroPlayer.Services.YoutubeParser
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.ToString());
+                OnError(e.ToString());
             }
-
-
-
+           
             return youtubeResults;
         }
         private static async Task DownloadThumbnails(List<YoutubeResult> results)
         {
-            Directory.CreateDirectory(output);
-            await Task.WhenAll(results.Select(result => DownloadYoutubeThumbnails(result)));
-
+            var dir = Directory.CreateDirectory(output);
+            await Task.WhenAll(results.Select(result => DownloadYoutubeThumbnail(result)));
+            foreach (FileInfo file in dir.EnumerateFiles())
+            {
+             
+                File.Delete(file.FullName);
+            }
             //Clear all bitmap memory.
             GC.Collect();
         }
-        public static async Task DownloadYoutubeThumbnails(YoutubeResult result)
+        public static async Task DownloadYoutubeThumbnail(YoutubeResult result)
         {
             try
             {
+               
                 using var client = new WebClient();
                 await client.DownloadFileTaskAsync(new Uri(result.ImgUrl), result.ImagePath);
 
@@ -177,11 +181,12 @@ namespace AeroPlayer.Services.YoutubeParser
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.ToString());
+                OnError(e.ToString());
             }
 
         }
 
- 
+
     }
 }

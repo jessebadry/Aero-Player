@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AeroPlayer.Views"
+             
              mc:Ignorable="d" DataContext="{StaticResource SongSelectionViewModel}"   >
     <Grid>
         <Grid.ColumnDefinitions>
@@ -15,21 +16,30 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <ListBox SelectedItem="{Binding CurrentPlayList,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"  ItemsSource="{Binding Path=PlayLists}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
+        <ListBox x:Name="PlayListList"   SelectedItem="{Binding CurrentPlayList,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"  ItemsSource="{Binding Path=PlayLists}"  HorizontalContentAlignment="Stretch"  Grid.Column="0" >
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete Playlist" Command="{Binding DeletePlayList}"   CommandParameter="{Binding  CurrentPlayList}"></MenuItem>
+                    <MenuItem Header="Change Name" Command="{Binding ChangePlayList}" CommandParameter="{Binding  CurrentPlayList}" ></MenuItem>
+                    <MenuItem Header="Open Playlist folder" Command="{Binding OpenPlaylistFolder}"  CommandParameter="{Binding  CurrentPlayList}" />
+                </ContextMenu>
+
+            </ListBox.ContextMenu>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
                         <TextBlock TextAlignment="Center" FontSize="15" Foreground="Black"  Text="{Binding Path=DisplayName}"></TextBlock>
+
                     </StackPanel>
                 </DataTemplate>
 
             </ListBox.ItemTemplate>
 
         </ListBox>
-        
+
         <ContentControl Grid.Column="1" Grid.RowSpan="2" x:Name="PlayListContentControl" Content="{Binding Path=PlayLists}"
                         ContentTemplate="{StaticResource SongList}" >
-            
+
         </ContentControl>
         <Button Command="{Binding AddPlaylist}" Grid.Column="0" Grid.Row="1" Content="Add Playlist"></Button>
         <Button Command="{Binding AddSong}" Grid.Column="0" Grid.Row="2" Content="Add Song"></Button>

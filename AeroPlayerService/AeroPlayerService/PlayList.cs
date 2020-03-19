@@ -1,24 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AeroPlayerService
 {
     // Playlist of songs defined from folders.
     public class PlayList : PropertyObject
     {
-        private int current_index;
+        private int currentIndex;
         public List<Song> Songs { get; set; }
         public int CurrentIndex
         {
             get
             {
-                return current_index;
+                return currentIndex;
             }
             set
             {
                 //Index change of current index changes CurrentSong, so must update currentsong...
-                current_index = value;
+                if (value > Songs.Count - 1)
+                    currentIndex = 0;
+                else if (value < 0)
+                    currentIndex = Songs.Count - 1;
+                else
+                {
+
+                    currentIndex = value;
+                }
                 onPropertyChanged("CurrentSong");
             }
         }
@@ -26,11 +35,12 @@ namespace AeroPlayerService
         {
             get
             {
-                return Path.GetFileNameWithoutExtension(AbsoluteName);
+                return Path.GetFileNameWithoutExtension(RelativePathName);
             }
+
         }
         private string absoluteName;
-        public string AbsoluteName
+        public string RelativePathName
         {
             get
             {
@@ -39,8 +49,10 @@ namespace AeroPlayerService
             set
             {
                 absoluteName = value;
+                LoadSongs();
+                onPropertyChanged("DisplayName");
             }
-           
+
         }
         public string CurrentSong
         {
@@ -48,15 +60,15 @@ namespace AeroPlayerService
             {
                 if (!ValidSongIndex(CurrentIndex))
                     return null;
-                return Songs[CurrentIndex].AbsoluteName;
-            }
-            set
-            {
-                CurrentSong = value;
+                return Songs[CurrentIndex].RelativePath;
             }
 
         }
         private bool ValidSongIndex(int index) => (index <= Songs.Count - 1 && index >= 0);
+        public static string CreateValidPlayListPath(string playlistName)
+        {
+            return Path.Join(MusicManager.MusicPlayerPath, playlistName);
+        }
         public static string CreateValidSongPath(string playlistName, string SongRelativeName)
         {
             return Path.Join(MusicManager.MusicPlayerPath, playlistName, SongRelativeName + ".mp3");
@@ -75,10 +87,10 @@ namespace AeroPlayerService
             }
             else
             {
-                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", AbsoluteName, newIndex));
+                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", RelativePathName, newIndex));
             }
         }
-        private int GetIndexOfSong(string song) => Songs.FindIndex(s => s.AbsoluteName == song);
+        private int GetIndexOfSong(string song) => Songs.FindIndex(s => s.RelativePath == song);
         public void SetCurrentSong(string song)
         {
             int newIndex = GetIndexOfSong(song);
@@ -91,12 +103,12 @@ namespace AeroPlayerService
             int index = GetIndexOfSong(oldSongAbsolute);
             if (ValidSongIndex(index))
             {
-                string oldSongName = Songs[index].AbsoluteName;
+                string oldSongName = Songs[index].RelativePath;
                 try
                 {
-                    string newSongName = CreateValidSongPath(DisplayName, newSong); ;
+                    string newSongName = CreateValidSongPath(DisplayName, newSong);
                     File.Move(oldSongName, newSongName);
-                    Songs[index] = new Song(newSongName, AbsoluteName);
+                    Songs[index] = new Song(newSongName, RelativePathName);
                 }
                 catch (IOException e)
                 {
@@ -112,27 +124,27 @@ namespace AeroPlayerService
         }
         public void SetSongIndex(int index)
         {
-            
+
             if (ValidSongIndex(index))
             {
                 //Change Low level index of songs so next time current song is retrieved, songs will start from the beginning of the playlist.
                 // As Changing CurrentIndex Property will invoke calls to PropertyChanged..
 
-                current_index = index;
+                currentIndex = index;
             }
             else
             {
-                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", AbsoluteName, index));
+                throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", RelativePathName, index));
             }
         }
         public bool NextSong(bool next)
         {
-            if (CurrentIndex == Songs.Count - 1 && next)
+            if (CurrentIndex >= Songs.Count - 1 && next)
             {
                 CurrentIndex = 0;
                 return true;
             }
-            else if (CurrentIndex == 0 && !next)
+            else if (CurrentIndex <= 0 && !next)
             {
                 CurrentIndex = Songs.Count - 1;
                 return true;
@@ -145,15 +157,42 @@ namespace AeroPlayerService
             {
                 CurrentIndex--;
             }
+            Console.WriteLine("play list index = " + CurrentIndex);
             return false;
+        }
+        private Song FindSong(string SongAbsoluteName) => Songs.Where(s => s.RelativePath == SongAbsoluteName).Take(1).FirstOrDefault();
+        public bool DeleteSong(string SongAbsoluteName)
+        {
+            var song = FindSong(SongAbsoluteName);
+            if (song != null)
+            {
+                try
+                {
+
+                    File.Delete(SongAbsoluteName);
+                    Songs.Remove(song);
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+
+            }
+            return true;
         }
         public PlayList()
         {
-            current_index = -1;
+
         }
-        public PlayList(string playListAbsoluteName) : this()
+        private void LoadSongs()
+        {
+            Songs = Directory.GetFiles(RelativePathName).Where(s => s.EndsWith(".mp3")).Select(s => new Song(s, RelativePathName)).ToList();
+        }
+        public PlayList(string playListAbsoluteName)
         {
             this.absoluteName = playListAbsoluteName;
+            currentIndex = -1;
+            LoadSongs();
         }
     }
 

@@ -1,32 +1,29 @@
-﻿using AeroPlayerService;
+﻿using AeroPlayer.Services.MusicPlayerGuiLayer;
+using AeroPlayerService;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Text;
 using System.Windows.Input;
 
 namespace AeroPlayer.ViewModels
 {
     public class MainViewModel : PropertyObject
     {
-        public static MusicPlayer player;
+        public static Player player;
         private string currentSong = "";
         private string currentPlayList = "";
         public float Volume
         {
-            get => player.Volume;
+            get => player.player.Volume;
             set
             {
-                player.Volume = value;
+                player.player.Volume = value;
                 onPropertyChanged("Volume");
             }
         }
-        public double PlayBackLength { get => player.AudioMaxLength; }
+        public double PlayBackLength { get => player.player.AudioMaxLength; }
         public double PlaybackPos
         {
-            get => player.PlaybackPos;
-            set { player.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
+            get => player.player.PlaybackPos;
+            set { player.player.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
         }
         public string CurrentSong
         {
@@ -49,23 +46,21 @@ namespace AeroPlayer.ViewModels
         }
 
 
-        
-
         public MainViewModel()
         {
-            player = new MusicPlayer();
-            player.OnPlaybackChange += delegate (object sender, EventArgs e)
-             {
-                 onPropertyChanged("PlaybackPos");
-             };
-            player.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
+            player = new Player();
+            player.player.OnPlaybackChange += delegate (object sender, EventArgs e)
             {
-                CurrentSong = player.SongDisplay;
-                CurrentPlayList = player.PlayListDisplay;
+                 onPropertyChanged("PlaybackPos");
+            };
+            player.player.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
+            {
+                CurrentSong = player.player.SongDisplay;
+                CurrentPlayList = player.player.PlayListDisplay;
             };
 
-            player.SongManager.RandomInPlayList();
-            player.MusicPlayerEvent += MusicPlayerEventHandler;
+            player.player.SongManager.RandomInPlayList();
+            player.player.MusicPlayerEvent += MusicPlayerEventHandler;
         }
 
         private void MusicPlayerEventHandler(object sender, MusicPlayerEventArgs e)
@@ -73,17 +68,15 @@ namespace AeroPlayer.ViewModels
             //When song is played is the same as pressing pause/play button
             switch (e.EventType)
             {
-                case MusicEventType.NewSongEvent:
-                    CurrentSong = player.SongDisplay;
-                    CurrentPlayList = player.PlayListDisplay;
-
-                    goto case MusicEventType.TogglePauseEvent;
                 case MusicEventType.TogglePauseEvent:
+
                     onPropertyChanged("PlayingStatus");
-
-
                     break;
+                case MusicEventType.Reset:
 
+                    CurrentSong = player.player.SongDisplay;
+                    CurrentPlayList = player.player.PlayListDisplay;
+                    break;
                 default:
                     return;
             }
@@ -95,7 +88,7 @@ namespace AeroPlayer.ViewModels
             {
                 return new DelegateCommand(() =>
                 {
-                    player.SongManager.NextSong(true);
+                    player.player.SongManager.NextSong(true);
                 });
             }
         }
@@ -105,7 +98,7 @@ namespace AeroPlayer.ViewModels
             {
                 return new DelegateCommand(() =>
                 {
-                    player.SongManager.NextSong(false);
+                    player.player.SongManager.NextSong(false);
                 });
             }
         }
@@ -120,7 +113,7 @@ namespace AeroPlayer.ViewModels
                     try
                     {
 
-                        player.AudioPauseToggleStatus();
+                        player.player.AudioPauseToggleStatus();
 
                     }
                     catch (NullReferenceException e)
@@ -134,10 +127,8 @@ namespace AeroPlayer.ViewModels
         {
             get
             {
-
-                return player.PlayingStatus ? "Pause" : "Play";
+                return player.player.PlayingStatus ? "Pause" : "Play";
             }
-
         }
 
 

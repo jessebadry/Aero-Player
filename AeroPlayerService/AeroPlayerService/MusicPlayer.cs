@@ -14,7 +14,9 @@ namespace AeroPlayerService
         //Passes bool of toggle
         TogglePauseEvent,
         // Passes String of song name
-        NewSongEvent
+        NewSongEvent,
+        // Passes nothing
+        Reset,
     }
     public delegate void MusicPlayerEventHandler(object sender, MusicPlayerEventArgs e);
 
@@ -35,6 +37,7 @@ namespace AeroPlayerService
     // Uses MusicQueue to select next song to play to audio.
     public class MusicPlayer : PropertyObject, IDisposable
     {
+        public MusicManager SongManager { get; }
         bool disposed = false;
         const float MAX_VOLUME = 1F; // Max volume for NAudio WaveOutEvent..
         const bool DEFAULT_PLAYLIST_DIRECTION = true; // forward.
@@ -44,10 +47,27 @@ namespace AeroPlayerService
         PlaybackState UserDefinedPlayState = PlaybackState.Stopped;
 
         //Object that manages the songs the player uses.
-        public MusicManager SongManager { get; }
+      
         //Events
         public event MusicPlayerEventHandler MusicPlayerEvent;
         public event NewPlaybackEventHandler OnPlaybackChange;
+
+        //Wipes currently playing song from audio out and settings.
+        private void AudioReset()
+        {
+            AudioOut.Stop();
+            AudioOut.Dispose();
+            if (!AudioIsNull())
+            {
+                mp3Reader.Close();
+                mp3Reader.Dispose();
+            }
+            SongDisplay = "";
+            PlayListDisplay = "";
+
+            InvokeMusicPlayerEvent(MusicEventType.Reset, null);
+
+        }
         //
         //SETTINGS
         public float Volume
@@ -161,17 +181,18 @@ namespace AeroPlayerService
                 onPropertyChanged("SongDisplay");
             }
         }
-        private string playlist_display;
+        private string playlistDisplay;
         public string PlayListDisplay
         {
-            get => playlist_display;
+            get => playlistDisplay;
             set
             {
-                playlist_display = Path.GetFileName(value);
+                Console.WriteLine("Set to " + value);
+                playlistDisplay = Path.GetFileName(value);
 
             }
         }
-    
+
         /// <summary>
         /// Toggles Audio playing=>paused, pause=>playing.
         /// <br/>If song is not initailized, music player will request new song from SongManager.
@@ -210,9 +231,9 @@ namespace AeroPlayerService
         {
             return mp3Reader == null;
         }
-        private void LoadSong(string song_name)
+        private void LoadSong(string songName)
         {
-            if (song_name == null)
+            if (songName == null)
                 return;
             AudioOut.Stop();
             AudioOut.Dispose();
@@ -223,7 +244,7 @@ namespace AeroPlayerService
                 mp3Reader.Dispose();
             }
 
-            mp3Reader = new Mp3FileReader(song_name);
+            mp3Reader = new Mp3FileReader(songName);
             AudioOut.Init(mp3Reader);
 
             PlaybackPos = 0;
@@ -236,9 +257,13 @@ namespace AeroPlayerService
 
             if (UserDefinedPlayState == PlaybackState.Playing)
             {
-                AudioOut.Play();
-            }
+                try
+                {
 
+                    AudioOut.Play();
+                }catch(Exception e) { }
+            }
+            Console.WriteLine("Playing song..");
             SongDisplay = songName;
             PlayListDisplay = playlist;
 
@@ -250,7 +275,7 @@ namespace AeroPlayerService
             switch (SongManager.LoopType)
             {
                 case PlayLoop.SingleLoop:
-                    LoadSong(SongManager.SongAbsolute);
+                    LoadSong(SongManager.CurrentPlayingSong);
                     AudioOut.Play();
 
                     break;
@@ -265,8 +290,14 @@ namespace AeroPlayerService
         }
         public MusicPlayer()
         {
-            SongManager = MusicManager.Instance; 
+            SongManager = MusicManager.Instance;
+       
 
+            SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool deleted)
+            {
+                if (PlayListDisplay == playlist.DisplayName && deleted)
+                    AudioReset();
+            };
             SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
                 PlaySong(e.PlayList, e.NewSong);

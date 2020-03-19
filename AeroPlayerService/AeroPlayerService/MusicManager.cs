@@ -12,7 +12,9 @@ namespace AeroPlayerService
     // Non-Instance based, does not need multiple MusicQueues, does not apply.
 
     public delegate void NewSongEventHandler(object sender, MusicManagerEventArgs e);
-    public delegate void AddSongEventHandler(object sender, PlayList playlist);
+    public delegate void PlayListChangedEventHandler(object sender, PlayList playlist, bool delete);
+    public delegate void OnErrorEventHandler(string error);
+    public delegate void OnChangeCurrentPlaylistNameEventHandler();
     public class MusicManagerEventArgs : EventArgs
     {
         public string NewSong { get; }
@@ -34,11 +36,12 @@ namespace AeroPlayerService
     public class MusicManager
 
     {
-        public static readonly string MusicPlayerPath = "MusicPlayer\\Songs";
+        public static readonly string MusicPlayerPath = @"MusicPlayer\Songs";
 
         public PlayLoop LoopType { get; set; } = PlayLoop.PlayListLoop;
         public void ToggleLooping()
         {
+
             if (LoopType == PlayLoop.PlayListLoop)
             {
                 LoopType = PlayLoop.SingleLoop;
@@ -50,10 +53,10 @@ namespace AeroPlayerService
             }
             else if (LoopType == PlayLoop.NoLoop)
             {
-
                 LoopPlayList = true;
                 LoopType = PlayLoop.PlayListLoop;
             }
+            Console.WriteLine("loop = "+ LoopType.ToString());
         }
         //Singleton impl...
         private static MusicManager instance = null;
@@ -77,8 +80,10 @@ namespace AeroPlayerService
         //
 
         //Events
+        public event OnErrorEventHandler OnErrorEvent;
         public event NewSongEventHandler OnSongChange;
-        public event AddSongEventHandler OnAddSong;
+        public event OnChangeCurrentPlaylistNameEventHandler OnChangingCurrentPlaylistName;
+        public event PlayListChangedEventHandler OnPlaylistChange;
         //
 
         //Storage
@@ -88,7 +93,11 @@ namespace AeroPlayerService
         public bool LoopPlayList { get; set; } = false;
         //
         private string playingSong;
-        public string SongAbsolute
+
+        /// <summary>
+        /// Important: Changes currently playing song and activates new song event, if null, event will NOT fire.
+        /// </summary>
+        public string CurrentPlayingSong
         {
             get
             {
@@ -98,7 +107,9 @@ namespace AeroPlayerService
             {
                 string oldSong = playingSong;
                 playingSong = value;
-                OnNewSong(new MusicManagerEventArgs(playingSong, currentPlayList.AbsoluteName, oldSong));
+                // If Null playlist is being reset thus not being changed.
+                if (currentPlayList != null)
+                    OnNewSong(new MusicManagerEventArgs(playingSong, currentPlayList.RelativePathName, oldSong));
             }
         }
 
@@ -121,38 +132,72 @@ namespace AeroPlayerService
             }
             set
             {
+
                 currentPlayList = value;
-                SongAbsolute = CurrentPlayList.CurrentSong;
+                if (value == null)
+                {
+                    CurrentPlayingSong = "";
+                }
+                else
+                {
+
+                    CurrentPlayingSong = currentPlayList.CurrentSong;
+                }
             }
         }
-
+        private void OnError(string error)
+        {
+            OnErrorEvent?.Invoke(error);
+        }
         protected virtual void OnNewSong(MusicManagerEventArgs e)
         {
-            NewSongEventHandler handler = OnSongChange;
-            handler?.Invoke(this, e);
+            OnSongChange?.Invoke(this, e);
         }
 
-        protected virtual void OnAddSongRun(PlayList playList)
+        protected virtual void PlayListChanged(PlayList playList, bool delete)
         {
-            AddSongEventHandler handler = OnAddSong;
-            handler?.Invoke(this, playList);
+            PlayListChangedEventHandler handler = OnPlaylistChange;
+            handler?.Invoke(this, playList, delete);
         }
-
+        private void OnChangeCurrentPlayListName()
+        {
+            //Tells other code to stop using the playlist and release its files.
+            OnChangingCurrentPlaylistName?.Invoke();
+        }
         public bool ChangeSongName(string playlistName, string oldSongDisplay, string newSong)
         {
             var playlist = FindPlayList(playlistName);
             bool status = playlist.ChangeSongName(oldSongDisplay, newSong);
             return status;
         }
+        public void ChangePlaylistName(string playlistName, string newName)
+        {
+            var playlist = FindPlayList(playlistName);
+            if (playlist == CurrentPlayList)
+                OnChangeCurrentPlayListName();
 
+            string newPlaylistName = PlayList.CreateValidPlayListPath(newName);
+            try
+            {
+                Directory.Move(PlayList.CreateValidPlayListPath(playlistName), newPlaylistName);
+                playlist.RelativePathName = newPlaylistName;
+                PlayListChanged(playlist, false);
+            }catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
         public PlayList CreateNewPlayList(string name, List<string> newSongs = null)
         {
-            var newPlaylist = new PlayList(name)
+            Console.WriteLine("Creating playlist " + name);
+            string playlistPath = Path.Join(MusicPlayerPath, name);
+            Directory.CreateDirectory(playlistPath);
+            var newPlaylist = new PlayList(playlistPath)
             {
                 Songs = new List<Song>()
             };
 
-            Directory.CreateDirectory(Path.Join(MusicPlayerPath, name));
+
 
             if (newSongs != null)
             {
@@ -160,7 +205,7 @@ namespace AeroPlayerService
                 {
                     if (File.Exists(song) && song.EndsWith(".mp3"))
                     {
-                        newPlaylist.Songs.Add(new Song(song, newPlaylist.AbsoluteName));
+                        newPlaylist.Songs.Add(new Song(song, newPlaylist.RelativePathName));
                     }
                 }
             }
@@ -168,40 +213,69 @@ namespace AeroPlayerService
             PlayLists.Add(newPlaylist);
             return newPlaylist;
         }
-        public void SetCurrentlyPlaying(string playList, string songNameAbsolute)
+        public void SetCurrentlyPlaying(string playList, string songRelativePath)
         {
 
-            Console.WriteLine("playlist name = " + playList + " Song = " + songNameAbsolute);
-            PlayList playlist = PlayLists.Where(p => p.AbsoluteName == playList).FirstOrDefault();
+            Console.WriteLine(playList);
+            PlayList playlist = PlayLists.Where(p => p.RelativePathName == playList).FirstOrDefault();
 
             if (playlist == null)
-                throw new KeyNotFoundException(string.Format("Playlist {0} not found!!", playlist));
-            Console.WriteLine(playlist.Songs[0].SongDisplay);
-            Song found_song = playlist.Songs.Where(Song => Song.AbsoluteName == songNameAbsolute).FirstOrDefault();
+                throw new KeyNotFoundException(string.Format("Playlist "+  playlist));
+       
+            Song foundSong = playlist.Songs.Where(Song => Song.RelativePath == songRelativePath).FirstOrDefault();
 
-            if (found_song != null)
+            if (foundSong != null)
             {
                 //Set song for playlist to sync playlist's queue index.
-                playlist.SetCurrentSong(found_song.AbsoluteName);
-
+                playlist.SetCurrentSong(foundSong.RelativePath);
                 CurrentPlayList = playlist; // Set new playlist, which will set currentSong
             }
             else
             {
-                throw new KeyNotFoundException(string.Format("Song {0} Not Found!", songNameAbsolute));
+                throw new KeyNotFoundException(string.Format("Song {0} Not Found!", songRelativePath));
             }
 
 
         }
         private PlayList FindPlayList(string playlistName) => PlayLists.Where(p => p.DisplayName == playlistName).FirstOrDefault();
+        public void DeletePlaylist(string playlistName)
+        {
+            var playlist = FindPlayList(playlistName);
+          
+
+            if (playlist != null)
+            {
+                if (playlist.DisplayName == CurrentPlayList.DisplayName)
+                    CurrentPlayList = null;
+                PlayLists.Remove(playlist);
+                
+                PlayListChanged(playlist, true);
+                foreach(var file in Directory.EnumerateFiles(playlist.RelativePathName))
+                {
+                    File.Delete(file);
+                }
+                Directory.Delete(playlist.RelativePathName);
+            }
+
+        }
+
+        public void DeleteSong(string playlistAbsoluteName, string song)
+        {
+            string playlistDisplayName = Path.GetFileNameWithoutExtension(playlistAbsoluteName);
+            var playlist = FindPlayList(playlistDisplayName);
 
 
+            bool worked = playlist.DeleteSong(song);
+
+            if (worked)
+                PlayListChanged(playlist, false);
+        }
         private void AddSong(ref PlayList playlist, string playlistName, string NewSong)
         {
             bool invalid = false;
 
             string newSongPlace = Path.Join(MusicPlayerPath, playlistName, Path.GetFileName(NewSong));
-            invalid = playlist.Songs.Any(s => s.AbsoluteName == newSongPlace);
+            invalid = playlist.Songs.Any(s => s.RelativePath == newSongPlace);
 
 
             invalid = !File.Exists(NewSong);
@@ -209,48 +283,56 @@ namespace AeroPlayerService
             if (!invalid)
                 try
                 {
-                    File.Copy(NewSong, newSongPlace, true);
+                    if (!File.Exists(newSongPlace))
+                        File.Copy(NewSong, newSongPlace, true);
 
-                    playlist.Songs.Add(new Song(newSongPlace, playlist.AbsoluteName));
+                    playlist.Songs.Add(new Song(newSongPlace, playlist.RelativePathName));
+
                 }
                 catch (Exception e)
                 {
+                    OnError(e.ToString());
                     invalid = true;
                 }
+            else
+                OnError(string.Format("Error could not find file, '{0}'", NewSong));
+
 
 
         }
         //Returns bool  if successful.
-        public bool AddSongs(string playlistName, string[] newSongs)
+        public bool AddSongs(string playlistDisplayName, string[] newSongs)
         {
+            Console.WriteLine("Adding songs to " + playlistDisplayName);
+
             if (newSongs == null)
                 throw new ArgumentNullException("Null Songs");
 
             PlayList playlist;
 
 
-            playlist = FindPlayList(playlistName);
+            playlist = FindPlayList(playlistDisplayName);
 
-            if (playlist == null && !string.IsNullOrEmpty(playlistName))
-                playlist = CreateNewPlayList(playlistName, new List<string>());
+            if (playlist == null && !string.IsNullOrEmpty(playlistDisplayName))
+                playlist = CreateNewPlayList(playlistDisplayName, new List<string>());
 
             foreach (string NewSong in newSongs)
-                AddSong(ref playlist, playlistName, NewSong);
+                AddSong(ref playlist, playlistDisplayName, NewSong);
 
-            OnAddSongRun(playlist);
+            PlayListChanged(playlist, false);
             return true;
         }
 
         public void RandomInPlayList()
         {
-            if (CurrentPlayList == null)
+            if (CurrentPlayList == null || CurrentPlayList.Songs.Count <= 0)
                 return;
             Random rand = new Random();
             var songs = CurrentPlayList.Songs;
             int skip = rand.Next(0, songs.Count);
             Song song = songs.Skip(skip).Take(1).First();
             CurrentPlayList.SetCurrentSong(song);
-            SongAbsolute = song.AbsoluteName;
+            CurrentPlayingSong = song.RelativePath;
         }
         private void CheckAndChangePlaylist(ref bool next, ref bool PlayListChange)
         {
@@ -282,8 +364,6 @@ namespace AeroPlayerService
                 // use that index to retreive another playlist to use.
                 CurrentPlayList = PlayLists[newPlayListIndex];
                 CurrentPlayList.SetSongIndex(0);
-
-
             }
         }
         public void NextSong(bool next)
@@ -296,7 +376,7 @@ namespace AeroPlayerService
                 {
                     CheckAndChangePlaylist(ref next, ref PotentialPlayListChange);
                 }
-                this.SongAbsolute = CurrentPlayList.CurrentSong;
+                CurrentPlayingSong = CurrentPlayList.CurrentSong;
             }
         }
 
@@ -305,11 +385,7 @@ namespace AeroPlayerService
             var PlayListFolders = Directory.EnumerateDirectories(MusicPlayerPath);
             foreach (var folder in PlayListFolders)
             {
-                var newPlayList = new PlayList
-                {
-                    AbsoluteName = folder,
-                    Songs = Directory.GetFiles(folder).Where(s => s.EndsWith(".mp3")).Select(s => new Song(s, folder)).ToList()
-                };
+                var newPlayList = new PlayList(folder);
                 PlayLists.Add(newPlayList);
             }
 
