@@ -12,6 +12,10 @@
     <ViewModels:YoutubeDownloaderViewModel x:Key="YoutubeDownloaderViewModel"/>
     <ViewModels:SongSelectionViewModel x:Key="SongSelectionViewModel"/>
     <ViewModels:SongDownloadDialogViewModel x:Key="SongDownloadDialogViewModel"/>
+    
+    
+    
+    
     <Style x:Key="MusicPlayerButton" TargetType="{x:Type Button}" >
         <Setter Property="Foreground" Value="White"></Setter>
         <Setter Property="Template">
@@ -39,8 +43,15 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="SongSelectionTemplate.xaml"/>
     </ResourceDictionary.MergedDictionaries>
+
+    <!--Global Changes-->
+
+    
+    
+
 </ResourceDictionary>

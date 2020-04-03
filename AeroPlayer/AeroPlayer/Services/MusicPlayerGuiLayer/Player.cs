@@ -9,23 +9,22 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
 {
 
     //AeroPlayer version of the AeroPlayer Service.
-    public class Player : PropertyObject
+    public class Player :  MusicPlayer
     {
-        public readonly MusicPlayer player = new MusicPlayer();
         private ObservableCollection<PlayList> playlists = new ObservableCollection<PlayList>();
         public ObservableCollection<PlayList> PlayLists { get { return playlists; } set { playlists = value; onPropertyChanged("PlayLists"); } }
 
         private void LoadPlayLists()
         {
             PlayLists.Clear();
-           for(int i =0; i < player.SongManager.PlayLists.Count;i++)
+            for (int i = 0; i < SongManager.PlayLists.Count; i++)
             {
-                PlayLists.Add(player.SongManager.PlayLists[i]);
+                PlayLists.Add(SongManager.PlayLists[i]);
             }
         }
-        public Player()
+        public Player():base()
         {
-            player.SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool delete)
+            SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool delete)
             {
                 Console.WriteLine("deleting..");
                 if (delete)
@@ -33,21 +32,14 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
                     PlayLists.Remove(playlist);
                     return; /////////////////  LEAVE FUNCTION
                 }
+                //If not deleting this playlist, we are editing the existing one, or adding a new one if not found.
 
                 int index = PlayLists.Select((Playlist, index) => new { Playlist, index })
                             .First(s => s.Playlist.DisplayName == playlist.DisplayName).index;
-                //for (int i = 0; i < PlayLists.Count; i++)
-                //{
-                //    if (PlayLists[i].DisplayName == playlist.DisplayName)
-                //    {
-                //        index = i;
-                //        break;
-                //    }
 
-                //}
                 Console.WriteLine("index = " + index);
 
-                if (index > PlayLists.Count - 1)
+                if (index >= 0 && index > PlayLists.Count - 1)
                     PlayLists.Add(playlist);
                 else
                     PlayLists[index] = playlist;
@@ -58,7 +50,7 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
             LoadPlayLists();
 
         }
-        
+
 
 
 

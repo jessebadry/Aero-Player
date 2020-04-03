@@ -44,7 +44,7 @@
                 <DataTemplate>
                     <StackPanel>
                         <DockPanel>
-                            <Image  Grid.Row="1" Source="{Binding ImageOutput}" Width="120" Height="120"  Margin="0,0,0,0" d:LayoutOverrides="Width"/>
+                            <Image  Grid.Row="1" Source="{Binding ImageBitMap}" Width="120" Height="120"  Margin="0,0,0,0" d:LayoutOverrides="Width"/>
                             
                             <TextBlock Grid.Row="0" TextAlignment="Center" Text="{Binding Title}" FontSize="20"></TextBlock>
                        

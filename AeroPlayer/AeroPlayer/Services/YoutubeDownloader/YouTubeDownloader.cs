@@ -44,7 +44,8 @@ namespace AeroPlayerService
                 }
                 catch (Exception e) {
                     Console.WriteLine(e);
-                    invalid = true; }
+                    invalid = true; 
+                }
 
 
                 if (!invalid)

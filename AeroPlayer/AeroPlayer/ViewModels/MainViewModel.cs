@@ -7,23 +7,43 @@ namespace AeroPlayer.ViewModels
 {
     public class MainViewModel : PropertyObject
     {
-        public static Player player;
+
+        //The Main view model contains the dashboard for the playing mechanisms from the player.
+        public static readonly Player GuiPlayer = new Player();
         private string currentSong = "";
         private string currentPlayList = "";
+        public PlayLoop LoopButtonImagePath
+        {
+            get
+            {
+                return GuiPlayer.SongManager.LoopType;
+            }
+
+
+        }
+        private void ToggleLoopDelegate()
+        {
+            
+            GuiPlayer.SongManager.ToggleLooping();
+            onPropertyChanged("LoopButtonImagePath");
+        }
+
+        public DelegateCommand ToggleLoop { get; set; }
+
         public float Volume
         {
-            get => player.player.Volume;
+            get => GuiPlayer.Volume;
             set
             {
-                player.player.Volume = value;
+                GuiPlayer.Volume = value;
                 onPropertyChanged("Volume");
             }
         }
-        public double PlayBackLength { get => player.player.AudioMaxLength; }
+        public double PlayBackLength { get => GuiPlayer.AudioMaxLength; }
         public double PlaybackPos
         {
-            get => player.player.PlaybackPos;
-            set { player.player.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
+            get => GuiPlayer.PlaybackPos;
+            set { GuiPlayer.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
         }
         public string CurrentSong
         {
@@ -44,25 +64,6 @@ namespace AeroPlayer.ViewModels
                 onPropertyChanged("CurrentPlayList");
             }
         }
-
-
-        public MainViewModel()
-        {
-            player = new Player();
-            player.player.OnPlaybackChange += delegate (object sender, EventArgs e)
-            {
-                 onPropertyChanged("PlaybackPos");
-            };
-            player.player.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
-            {
-                CurrentSong = player.player.SongDisplay;
-                CurrentPlayList = player.player.PlayListDisplay;
-            };
-
-            player.player.SongManager.RandomInPlayList();
-            player.player.MusicPlayerEvent += MusicPlayerEventHandler;
-        }
-
         private void MusicPlayerEventHandler(object sender, MusicPlayerEventArgs e)
         {
             //When song is played is the same as pressing pause/play button
@@ -73,64 +74,55 @@ namespace AeroPlayer.ViewModels
                     onPropertyChanged("PlayingStatus");
                     break;
                 case MusicEventType.Reset:
-
-                    CurrentSong = player.player.SongDisplay;
-                    CurrentPlayList = player.player.PlayListDisplay;
+                    //Resets are when the current song can no longer be played for some reason (like user deletion ect.)
+                    //When reset that means the current song and potentially playlist has changed.
+                    CurrentSong = GuiPlayer.SongManager.CurrentSongDisplay;
+                    CurrentPlayList = GuiPlayer.PlayListDisplay;
                     break;
                 default:
                     return;
             }
         }
 
-        public ICommand NextSongTrue
+        public ICommand NextSongTrue { get; set; }
+        public ICommand NextSongFalse { get; set; }
+        public ICommand PlaySong { get; set; }
+        public string PlayingStatus { get => GuiPlayer.PlayingStatus ? "Pause" : "Play"; }
+        public MainViewModel()
         {
-            get
-            {
-                return new DelegateCommand(() =>
-                {
-                    player.player.SongManager.NextSong(true);
-                });
-            }
-        }
-        public ICommand NextSongFalse
-        {
-            get
-            {
-                return new DelegateCommand(() =>
-                {
-                    player.player.SongManager.NextSong(false);
-                });
-            }
-        }
-        public ICommand PlaySong
-        {
-            get
+            NextSongTrue = new DelegateCommand(() => GuiPlayer.SongManager.NextSong(true));
+
+            NextSongFalse = new DelegateCommand(() => GuiPlayer.SongManager.NextSong(false));
+
+            PlaySong = new DelegateCommand(() =>
             {
 
-                return new DelegateCommand(() =>
+                try
                 {
 
-                    try
-                    {
+                    GuiPlayer.AudioPauseToggleStatus();
 
-                        player.player.AudioPauseToggleStatus();
+                }
+                catch (NullReferenceException e)
+                {
+                    Console.WriteLine(e);
+                }
+            });
+            ToggleLoop = new DelegateCommand(ToggleLoopDelegate);
 
-                    }
-                    catch (NullReferenceException e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                });
-            }
-        }
-        public string PlayingStatus
-        {
-            get
+            GuiPlayer.OnPlaybackChange += delegate (object sender, EventArgs e)
             {
-                return player.player.PlayingStatus ? "Pause" : "Play";
-            }
-        }
+                onPropertyChanged("PlaybackPos");
+            };
+            GuiPlayer.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
+            {
+                CurrentSong = e.SongDisplay;
+                CurrentPlayList = e.PlayListDisplay;
+            };
 
+            GuiPlayer.SongManager.RandomInPlayList();
+            GuiPlayer.MusicPlayerEvent += MusicPlayerEventHandler;
+        }
 
 
 

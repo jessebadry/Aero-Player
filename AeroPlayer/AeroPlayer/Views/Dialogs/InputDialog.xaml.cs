@@ -28,5 +28,14 @@ namespace AeroPlayer.Views.Dialogs
         {
             DialogResult = true;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Application current = Application.Current;
+            Window mainWin = current.MainWindow;
+            this.Left = mainWin.Left + (mainWin.Width - this.ActualWidth) / 2;
+            this.Top = mainWin.Top + (mainWin.Height - this.ActualHeight) / 2;
+
+        }
     }
 }

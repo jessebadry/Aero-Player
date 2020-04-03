@@ -15,6 +15,6 @@ namespace AeroPlayer.Models
         public string ImagePath { get; set; }
         public string Title { get; set; }
         public string Views { get; set; }
-        public ImageSource ImageOutput { get; set; }
+        public ImageSource ImageBitMap { get; set; }
     }
 }

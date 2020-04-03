@@ -177,7 +177,7 @@ namespace AeroPlayer.Services.YoutubeParser
                 image.BeginInit();
                 image.StreamSource = new MemoryStream(File.ReadAllBytes(result.ImagePath));
                 image.EndInit();
-                result.ImageOutput = image;
+                result.ImageBitMap = image;
             }
             catch (Exception e)
             {

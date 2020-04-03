@@ -4,11 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AeroPlayer.Views.Dialogs"
-        mc:Ignorable="d"
-        Title="InputDialog" Width="200" Height="200" >
-    <StackPanel>
-        <TextBlock x:Name="MessageBlock"></TextBlock>
-        <TextBox x:Name="ResponseBox"></TextBox>
+        mc:Ignorable="d"  Loaded="Window_Loaded"
+        Title="InputDialog" Width="400" Height="400"  >
+    <StackPanel  VerticalAlignment="Center" Margin="2,2,2,2">
+        <TextBlock FontSize="25" x:Name="MessageBlock"></TextBlock>
+        <TextBox FontSize="20" x:Name="ResponseBox"></TextBox>
         <Button Content="Ok" Click="Button_Click"></Button>
     </StackPanel>
 </Window>

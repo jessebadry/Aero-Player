@@ -32,7 +32,7 @@ namespace AeroPlayer.ViewModels
         ObservableCollection<PlayList> playLists;
         public ObservableCollection<PlayList> PlayLists
         {
-            get => MainViewModel.player.PlayLists;
+            get => MainViewModel.GuiPlayer.PlayLists;
             //set
             //{
             //    playLists = value;
@@ -46,6 +46,13 @@ namespace AeroPlayer.ViewModels
         DelegateCommand AddSongCommand;
         DelegateCommand AddPlayListCommand;
         DelegateCommand ChangeSongCommand;
+
+        private void AddToPlayLists(PlayList playlist)
+        {
+           
+            PlayLists.Add(playlist);
+            CurrentPlayList = playlist;
+        }
         public DelegateCommand<PlayList> ChangePlayList { get; }
         public DelegateCommand<PlayList> DeletePlayList { get; }
         public DelegateCommand<Song> DeleteSong { get; }
@@ -135,30 +142,43 @@ namespace AeroPlayer.ViewModels
             if (SongManager.CurrentPlayList == null)
             {
                 playlist = RunInputDialog("Enter new playlist name", "Create PlayList Name");
+                try
+                {
+
+                    AddToPlayLists(SongManager.CreateNewPlayList(playlist));
+                }catch (ArgumentNullException)
+                {
+
+                    return;
+                }
             }
             else
             {
                 playlist = CurrentPlayList.DisplayName;
             }
-            OpenFileDialog fileDialog = new OpenFileDialog
+            if (playlist != null)
             {
-                Multiselect = true,
-                Filter = "Mp3 Files (*.mp3)|*.mp3"
-            };
 
-
-            if (fileDialog.ShowDialog().Value)
-            {
-                string[] filenames = fileDialog.FileNames;
-
-                bool worked = SongManager.AddSongs(playlist, filenames);
-                if (worked)
+                OpenFileDialog fileDialog = new OpenFileDialog
                 {
-                    Console.WriteLine("Success");
-                }
-                else
+                    Multiselect = true,
+                    Filter = "Mp3 Files (*.mp3)|*.mp3"
+                };
+
+
+                if (fileDialog.ShowDialog() == true)
                 {
-                    Console.WriteLine("Error..");
+                    string[] filenames = fileDialog.FileNames;
+
+                    bool worked = SongManager.AddSongs(playlist, filenames);
+                    if (worked)
+                    {
+                        Console.WriteLine("Success");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error..");
+                    }
                 }
             }
 
@@ -192,8 +212,8 @@ namespace AeroPlayer.ViewModels
 
         public SongSelectionViewModel()
         {
-            player = MainViewModel.player;
-            SongManager = player.player.SongManager;
+            player = MainViewModel.GuiPlayer;
+            SongManager = player.SongManager;
             ChangeSongCommand = new DelegateCommand(ChangeSongDelegate);
             LoadSongCommand = new DelegateCommand(LoadSongDelegate);
             AddSongCommand = new DelegateCommand(AddSongDelegate);

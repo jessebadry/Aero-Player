@@ -6,7 +6,6 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary   Source="WPFControls/ControlStyles.xaml"/>
-
-
+    
     </Application.Resources>
 </Application>
