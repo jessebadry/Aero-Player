@@ -1,4 +1,5 @@
 ﻿using AeroPlayer.Models;
+using AeroPlayer.Services;
 using AeroPlayer.Views.Dialogs;
 using AeroPlayerService;
 using System;

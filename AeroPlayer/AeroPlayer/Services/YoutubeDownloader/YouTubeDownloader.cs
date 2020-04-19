@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using VideoLibrary;
 
-namespace AeroPlayerService
+namespace  AeroPlayer.Services
 {
     public class YouTubeDownloader
     {
