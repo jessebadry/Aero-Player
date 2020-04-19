@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon />
+    <ApplicationIcon>AeroIcon.ico</ApplicationIcon>
     <StartupObject>AeroPlayer.App</StartupObject>
   </PropertyGroup>
 
@@ -13,7 +13,7 @@
     <PackageReference Include="MediaToolkit" Version="1.1.0.1" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
-    <PackageReference Include="VideoLibrary" Version="3.0.0" />
+    <PackageReference Include="VideoLibrary" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>

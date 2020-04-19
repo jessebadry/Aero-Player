@@ -27,7 +27,7 @@ namespace AeroPlayerService
 
                 var inputFile = new MediaFile { Filename = YoutubeDownloaderPath + vid.FullName };
 
-                string outputName = Path.Join(output, Path.GetFileNameWithoutExtension(vid.FullName))+".mp3";
+                string outputName = Path.Join(output, Path.GetFileNameWithoutExtension(vid.FullName)) + ".mp3";
 
                 bool invalid = false;
                 try
@@ -40,11 +40,12 @@ namespace AeroPlayerService
 
                         engine.Convert(inputFile, outputFile);
                     }
-                    
+
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     Console.WriteLine(e);
-                    invalid = true; 
+                    invalid = true;
                 }
 
 

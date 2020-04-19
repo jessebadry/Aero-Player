@@ -9,7 +9,7 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
 {
 
     //AeroPlayer version of the AeroPlayer Service.
-    public class Player :  MusicPlayer
+    public class Player : MusicPlayer
     {
         private ObservableCollection<PlayList> playlists = new ObservableCollection<PlayList>();
         public ObservableCollection<PlayList> PlayLists { get { return playlists; } set { playlists = value; onPropertyChanged("PlayLists"); } }
@@ -22,11 +22,12 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
                 PlayLists.Add(SongManager.PlayLists[i]);
             }
         }
-        public Player():base()
+
+        public Player() : base()
         {
             SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool delete)
             {
-                Console.WriteLine("deleting..");
+
                 if (delete)
                 {
                     PlayLists.Remove(playlist);

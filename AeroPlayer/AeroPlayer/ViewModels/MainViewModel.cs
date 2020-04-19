@@ -12,6 +12,14 @@ namespace AeroPlayer.ViewModels
         public static readonly Player GuiPlayer = new Player();
         private string currentSong = "";
         private string currentPlayList = "";
+
+        public MusicManager SongManager
+        {
+            get
+            {
+                return GuiPlayer.SongManager;
+            }
+        }
         public PlayLoop LoopButtonImagePath
         {
             get
@@ -45,16 +53,7 @@ namespace AeroPlayer.ViewModels
             get => GuiPlayer.PlaybackPos;
             set { GuiPlayer.PlaybackPos = value; onPropertyChanged("PlaybackPos"); }
         }
-        public string CurrentSong
-        {
-            get => currentSong;
-            set
-            {
-                currentSong = value;
-                onPropertyChanged("CurrentSong");
-                onPropertyChanged("PlayBackLength");
-            }
-        }
+
         public string CurrentPlayList
         {
             get => currentPlayList;
@@ -76,7 +75,7 @@ namespace AeroPlayer.ViewModels
                 case MusicEventType.Reset:
                     //Resets are when the current song can no longer be played for some reason (like user deletion ect.)
                     //When reset that means the current song and potentially playlist has changed.
-                    CurrentSong = GuiPlayer.SongManager.CurrentSongDisplay;
+                   
                     CurrentPlayList = GuiPlayer.PlayListDisplay;
                     break;
                 default:
@@ -113,11 +112,14 @@ namespace AeroPlayer.ViewModels
             GuiPlayer.OnPlaybackChange += delegate (object sender, EventArgs e)
             {
                 onPropertyChanged("PlaybackPos");
+                
             };
             GuiPlayer.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
-                CurrentSong = e.SongDisplay;
+             
                 CurrentPlayList = e.PlayListDisplay;
+                onPropertyChanged("PlaybackPos");
+                onPropertyChanged("PlayBackLength");
             };
 
             GuiPlayer.SongManager.RandomInPlayList();

@@ -76,12 +76,7 @@ namespace AeroPlayer.ViewModels
                 List<string> AddedSongs = null;
                 await Task.Run(() =>
                 {
-                    Console.WriteLine("writing mp3s to "+  playlist.RelativePathName);
                     AddedSongs = YouTubeDownloader.DownloadSongs(downloadUrls, playlist.RelativePathName);
-
-
-
-
                 });
 
                 bool worked = MusicManager.Instance.AddSongs(playlist.DisplayName, AddedSongs.ToArray());

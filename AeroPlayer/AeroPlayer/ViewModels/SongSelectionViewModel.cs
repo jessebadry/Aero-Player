@@ -47,7 +47,7 @@ namespace AeroPlayer.ViewModels
         DelegateCommand AddPlayListCommand;
         DelegateCommand ChangeSongCommand;
 
-        private void AddToPlayLists(PlayList playlist)
+        private void AddToPlaylistsFromSongDel(PlayList playlist)
         {
            
             PlayLists.Add(playlist);
@@ -115,10 +115,11 @@ namespace AeroPlayer.ViewModels
         }
 
 
-        private string RunInputDialog(string message, string title)
+        private string RunInputDialog(string message, string title, string setText = null)
         {
             string output = null;
             var dialog = new InputDialog(message);
+            dialog.ResponseBox.Text = setText;
             dialog.Title = title;
             if (dialog.ShowDialog() == true)
             {
@@ -129,7 +130,7 @@ namespace AeroPlayer.ViewModels
         public void DeleteSongDelegate(Song song)
         {
             Console.WriteLine("Deleting song..");
-            SongManager.DeleteSong(song.RelativePlayListPath, song.RelativePath);
+            SongManager.DeleteSong(song);
         }
         public void DeletePlayListDelegate(PlayList PlayList)
         {
@@ -145,7 +146,7 @@ namespace AeroPlayer.ViewModels
                 try
                 {
 
-                    AddToPlayLists(SongManager.CreateNewPlayList(playlist));
+                    AddToPlaylistsFromSongDel(SongManager.CreateNewPlayList(playlist));
                 }catch (ArgumentNullException)
                 {
 
@@ -187,12 +188,13 @@ namespace AeroPlayer.ViewModels
         {
             if (Song == null)
                 return;
-            SongManager.SetCurrentlyPlaying(Song.RelativePlayListPath, Song.RelativePath);
+            Console.WriteLine(Song.RelativePlayListPath);
+            SongManager.SetCurrentlyPlaying(Song.RelativePlayListPath, Song.FilePath);
         }
-        private void ChangePlayListDelegate(PlayList oldplaylist)
+        private void ChangePlayListDelegate(PlayList playlist)
         {
-            string newName = RunInputDialog("Enter new playlist name", "Change PlayList name");
-            SongManager.ChangePlaylistName(oldplaylist.DisplayName, newName);
+            string newName = RunInputDialog("Enter new playlist name", "Change Play list name", playlist.DisplayName);
+            SongManager.ChangePlaylistName(playlist, newName);
         }
         private void OpenPlaylistFolderDelegate(PlayList playlist)
         {

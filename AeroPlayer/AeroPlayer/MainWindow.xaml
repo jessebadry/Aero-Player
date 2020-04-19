@@ -33,23 +33,11 @@
             
         </TabControl>
         <StackPanel Grid.Column="0" Grid.Row="1">
-            <TextBlock FontSize="30" Margin="0,22,0,0" HorizontalAlignment="Center"  >
-                <TextBlock.Text>
-                    <Binding Path="CurrentSong">
-                        <Binding.StringFormat>
-                         {0}
-                        </Binding.StringFormat>
-                    </Binding>
-                </TextBlock.Text>
+            <TextBlock Text="{Binding Path=SongManager.CurrentPlayList.CurrentSong.SongDisplay}" FontSize="30" Margin="0,22,0,0" HorizontalAlignment="Center"  >
+               
             </TextBlock>
-            <TextBlock FontSize="19" HorizontalAlignment="Center"  >
-                <TextBlock.Text>
-                    <Binding Path="CurrentPlayList">
-                        <Binding.StringFormat>
-                                    from {0}
-                        </Binding.StringFormat>
-                    </Binding>
-                </TextBlock.Text>
+            <TextBlock Text="{Binding Path=SongManager.CurrentPlayList.DisplayName}" FontSize="19" HorizontalAlignment="Center"  >
+                
             </TextBlock>
             
         </StackPanel>
@@ -57,7 +45,9 @@
 
         </Slider>
         <Slider Width="150" Grid.Row="3" Value="{Binding Volume}" Height="20" Maximum="1">
-
+            <Slider.ToolTip>
+                Volume
+            </Slider.ToolTip>
         </Slider>
         <DockPanel HorizontalAlignment="Center"   Grid.Column="0" Grid.Row="4">
             <Button  Style="{StaticResource ResourceKey=MusicPlayerButton}" Command="{Binding ToggleLoop}" Width="30" Height="30">
