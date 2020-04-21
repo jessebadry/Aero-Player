@@ -1,13 +1,13 @@
-﻿using AeroPlayerService;
+﻿
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using AeroPlayer.Views.Dialogs;
-using System.Linq;
 using AeroPlayer.Services.MusicPlayerGuiLayer;
 using System.Diagnostics;
 using System.IO;
+using AeroPlayerService;
 
 namespace AeroPlayer.ViewModels
 {

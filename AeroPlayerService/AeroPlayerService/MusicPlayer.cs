@@ -300,6 +300,11 @@ namespace AeroPlayerService
                 PlaySong(e.PlayList, e.NewSong);
             };
             StartPositionListener();
+
+            Song current = SongManager.CurrentPlayList?.CurrentSong;
+
+            if (current != null)
+                PlaySong(current.RelativePlayListPath, current.FilePath);
         }
         protected void Dispose(bool disposing)
         {

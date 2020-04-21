@@ -26,5 +26,10 @@ namespace AeroPlayer
             DataContext = new MainViewModel();
             InitializeComponent();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ((MainViewModel)DataContext).SongManager.Save();
+        }
     }
 }

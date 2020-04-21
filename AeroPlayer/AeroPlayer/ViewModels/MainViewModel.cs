@@ -122,7 +122,7 @@ namespace AeroPlayer.ViewModels
                 onPropertyChanged("PlayBackLength");
             };
 
-            GuiPlayer.SongManager.RandomInPlayList();
+            
             GuiPlayer.MusicPlayerEvent += MusicPlayerEventHandler;
         }
 

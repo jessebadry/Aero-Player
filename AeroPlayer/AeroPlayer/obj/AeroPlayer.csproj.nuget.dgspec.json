@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Code\\C# Code\\Aero Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj": {}
+    "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj": {}
   },
   "projects": {
-    "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
+    "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
         "projectName": "AeroPlayerService",
-        "projectPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+        "projectPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
         "packagesPath": "C:\\Users\\jesse\\.nuget\\packages\\",
-        "outputPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
+        "outputPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "E:\\Microsoft\\Xamarin\\NuGet\\"
@@ -51,6 +51,14 @@
             "NAudio": {
               "target": "Package",
               "version": "[1.9.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[4.7.0, )"
             }
           },
           "imports": [
@@ -72,14 +80,14 @@
         }
       }
     },
-    "D:\\Code\\C# Code\\Aero Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj": {
+    "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj",
+        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj",
         "projectName": "AeroPlayer",
-        "projectPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj",
+        "projectPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayer\\AeroPlayer\\AeroPlayer.csproj",
         "packagesPath": "C:\\Users\\jesse\\.nuget\\packages\\",
-        "outputPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayer\\AeroPlayer\\obj\\",
+        "outputPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayer\\AeroPlayer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "E:\\Microsoft\\Xamarin\\NuGet\\"
@@ -99,8 +107,8 @@
         "frameworks": {
           "netcoreapp3.1": {
             "projectReferences": {
-              "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
-                "projectPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj"
+              "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
+                "projectPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj"
               }
             }
           }
@@ -113,6 +121,28 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "dependencies": {
+            "HtmlAgilityPack": {
+              "target": "Package",
+              "version": "[1.11.21, )"
+            },
+            "MediaToolkit": {
+              "target": "Package",
+              "version": "[1.1.0.1, )"
+            },
+            "System.Data.Common": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
+            "VideoLibrary": {
+              "target": "Package",
+              "version": "[3.0.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

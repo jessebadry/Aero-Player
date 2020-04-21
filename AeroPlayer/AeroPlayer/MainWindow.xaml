@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:AeroPlayer"
         xmlns:converters="clr-namespace:AeroPlayer.ViewModels.Converters"
         mc:Ignorable="d" Background="gray"
-        Title="Aero Player" Height="450" Width="800">
+        Title="Aero Player" Height="450" Width="800"
+        Closing="Window_Closing">
     <Window.Resources>
         <converters:ToggleAudioTypeConverter x:Key="IconConverter"/>
     </Window.Resources>

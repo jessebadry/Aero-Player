@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {}
+    "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {}
   },
   "projects": {
-    "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
+    "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+        "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
         "projectName": "AeroPlayerService",
-        "projectPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+        "projectPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
         "packagesPath": "C:\\Users\\jesse\\.nuget\\packages\\",
-        "outputPath": "D:\\Code\\C# Code\\Aero Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
+        "outputPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "E:\\Microsoft\\Xamarin\\NuGet\\"
@@ -51,6 +51,14 @@
             "NAudio": {
               "target": "Package",
               "version": "[1.9.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[4.7.0, )"
             }
           },
           "imports": [
