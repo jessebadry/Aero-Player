@@ -27,6 +27,7 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
         {
             SongManager.OnErrorEvent += delegate (string errorMsg)
              {
+                 Console.WriteLine("Making dialog.. {0}", errorMsg);
                  ErrorDialog dialog = new ErrorDialog();
                  dialog.ErrorText.Text = errorMsg;
                  dialog.ShowDialog();
@@ -44,7 +45,6 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
                 int index = PlayLists.Select((Playlist, index) => new { Playlist, index })
                             .First(s => s.Playlist.DisplayName == playlist.DisplayName).index;
 
-                Console.WriteLine("index = " + index);
 
                 if (index >= 0 && index > PlayLists.Count - 1)
                     PlayLists.Add(playlist);

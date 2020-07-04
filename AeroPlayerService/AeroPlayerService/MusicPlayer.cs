@@ -248,7 +248,9 @@ namespace AeroPlayerService
                 {
                     AudioOut.Play();
                 }
-                catch (Exception) { }
+                catch (Exception) {
+
+                }
             }
 
             PlayListDisplay = playlist;

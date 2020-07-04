@@ -500,17 +500,25 @@ namespace AeroPlayerService
 
             return true;
         }
+
         MusicManager()
         {
             var dat = PlayListLoader.DeserializePlayLists();
+            var index = dat?.Current.Value;
+            if (dat == null)
+            {
+                Console.WriteLine("Null!");
+                OnError(string.Format("Could not load Playlists file {0}", PlayListLoader.SETTINGS_FILE));
+            }
+            else if (index != null && index >= 0 && index < PlayLists.Count)
+            {
 
-            PlayLists = dat?.playLists;
-            if (dat != null && dat.Current.HasValue)
+                PlayLists = dat?.playLists;
                 CurrentPlayList = PlayLists?[dat.Current.Value];
+            }
 
             if (PlayLists == null)
             {
-                Console.WriteLine("Set to null!");
                 PlayLists = new List<PlayList>();
                 Save();
             }
@@ -518,7 +526,6 @@ namespace AeroPlayerService
             {
                 CleanPlayLists();
             }
-
 
         }
         public void Save()

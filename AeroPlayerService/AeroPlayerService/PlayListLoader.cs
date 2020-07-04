@@ -49,24 +49,24 @@ namespace AeroPlayerService
             public List<PlayList> playLists { get; set; }
 
         }
-        private static string SettingsFile = Path.Join(MusicManager.MusicPlayerPath, "AeroPlayer.json");
+        public readonly static string SETTINGS_FILE = Path.Join(MusicManager.MusicPlayerPath, "AeroPlayer.json");
 
         public static void SerializePlayLists(List<PlayList> playlists, int? Current)
         {
             PlayListData dat = new PlayListData { Current = Current, playLists = playlists };
             MusicManager.EnsureMusicPlayerPath();
             string output = JsonConvert.SerializeObject(dat);
-            File.WriteAllText(SettingsFile, output);
+            File.WriteAllText(SETTINGS_FILE, output);
 
         }
         public static PlayListData DeserializePlayLists()
         {
             MusicManager.EnsureMusicPlayerPath();
-            if (!File.Exists(SettingsFile))
-                File.Create(SettingsFile).Close();
+            if (!File.Exists(SETTINGS_FILE))
+                File.Create(SETTINGS_FILE).Close();
             try
             {
-                return JsonConvert.DeserializeObject<PlayListData>(File.ReadAllText(SettingsFile));
+                return JsonConvert.DeserializeObject<PlayListData>(File.ReadAllText(SETTINGS_FILE));
             }
             catch (JsonSerializationException)
             {
