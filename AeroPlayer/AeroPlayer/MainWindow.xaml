@@ -45,6 +45,7 @@
         <Slider Width="500" Margin="0,0,0,0" Grid.Row="2" Value="{Binding PlaybackPos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding PlayBackLength, Mode=OneWay}">
 
         </Slider>
+       
         <Slider Width="150" Grid.Row="3" Value="{Binding Volume}" Height="20" Maximum="1">
             <Slider.ToolTip>
                 Volume
@@ -64,9 +65,14 @@
             <Button  Width="50" Height="50" Command="{Binding NextSongTrue }"  Style="{StaticResource MusicPlayerButton}">
                 right
             </Button>
-       
-        
-         
+
+            <!--<DockPanel>
+                <Label Content="{Binding PlaybackPos }"></Label>
+                <Label Content="/"></Label>
+                <Label Content="{Binding PlayBackLength}"></Label>
+
+            </DockPanel>-->
+
         </DockPanel>
 
     </Grid>

@@ -47,12 +47,7 @@ namespace AeroPlayer.ViewModels
         DelegateCommand AddPlayListCommand;
         DelegateCommand ChangeSongCommand;
 
-        private void AddToPlaylistsFromSongDel(PlayList playlist)
-        {
-           
-            PlayLists.Add(playlist);
-            CurrentPlayList = playlist;
-        }
+   
         public DelegateCommand<PlayList> ChangePlayList { get; }
         public DelegateCommand<PlayList> DeletePlayList { get; }
         public DelegateCommand<Song> DeleteSong { get; }
@@ -146,8 +141,11 @@ namespace AeroPlayer.ViewModels
                 try
                 {
 
-                    AddToPlaylistsFromSongDel(SongManager.CreateNewPlayList(playlist));
-                }catch (ArgumentNullException)
+                    var newPlayList = SongManager.CreateNewPlayList(playlist);
+                    PlayLists.Add(newPlayList);
+                    CurrentPlayList = newPlayList;
+                }
+                catch (ArgumentNullException)
                 {
 
                     return;

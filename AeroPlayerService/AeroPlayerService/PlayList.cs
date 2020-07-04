@@ -42,6 +42,10 @@ namespace AeroPlayerService
             }
        
         }
+        public void RemoveSong(Song song)
+        {
+            Songs.Remove(song);
+        }
         public string DisplayName
         {
             get
@@ -58,19 +62,18 @@ namespace AeroPlayerService
                 onPropertyChanged("DisplayName");
             }
         }
-        private string absoluteName;
+        private string RelativePathName_;
 
         public string RelativePathName
         {
             get
             {
                
-                return absoluteName;
+                return RelativePathName_;
             }
             set
             {
-                Console.WriteLine("playlist name set to = " + value);
-                absoluteName = value;
+                RelativePathName_ = value;
             }
 
         }
@@ -100,9 +103,10 @@ namespace AeroPlayerService
         //String version of SetSongIndex
         public void SetCurrentSong(Song song)
         {
-            if (song == null)
-                return;
+            if (song == null) return;
             int index = Songs.IndexOf(song);
+            if (index >= -1) return;
+
             SetSongByIndex(index);
         }
         private void SetSongByIndex(int newIndex)
@@ -129,7 +133,7 @@ namespace AeroPlayerService
         public bool ChangeSongName(string oldSongDisplay, string newSong)
         {
             string oldSongAbsolute = CreateValidSongPath(DisplayName, oldSongDisplay);
-            Console.WriteLine("Generated Path = " + oldSongAbsolute);
+
             int index = GetIndexOfSong(oldSongAbsolute);
             if (ValidSongIndex(index))
             {
@@ -174,9 +178,12 @@ namespace AeroPlayerService
             {
                 CurrentIndex--;
             }
-            Console.WriteLine("play list index = " + CurrentIndex);
             return false;
         }
+        /// <summary>
+        /// Checks if the song exists and if path is not null
+        /// </summary>
+        /// <returns></returns>
         public bool CurrentSongIsValid()
         {
             return (File.Exists(CurrentSong.FilePath) && CurrentSong.RelativePlayListPath != null);
@@ -204,19 +211,22 @@ namespace AeroPlayerService
         }
         public static bool IsAudioFile(string song)
         {
+            if (song == null)
+                throw new ArgumentNullException("Song cannot be null");
+
             bool isValid = false;
 
             string songLower = song.ToLower();
 
-            for (int i = 0; i < Types.AudioTypes.Count; i++)
+            for (int i = 0; i < Types.AudioTypes.Length; i++)
                 isValid = songLower.EndsWith(Types.AudioTypes[i]);
 
             return isValid;
         }
 
-        public PlayList(string playListAbsoluteName)
+        public PlayList(string playListPath)
         {
-            this.absoluteName = playListAbsoluteName;
+            this.RelativePathName_ = playListPath;
             currentIndex = -1;
         }
     }

@@ -14,8 +14,8 @@ namespace AeroPlayer.ViewModels
     class YoutubeDownloaderViewModel : PropertyObject
     {
         private bool isSearchingYoutube = false;
-        Tuple<string, string> selectedSong;
-        public Tuple<string, string> SelectedSong
+        (string, string) selectedSong;
+        public (string, string) SelectedSong
         {
             get
             {
@@ -56,7 +56,11 @@ namespace AeroPlayer.ViewModels
         }
         public ObservableCollection<YoutubeResult> YoutubeResults { get; set; } = new ObservableCollection<YoutubeResult>();
 
-        public ObservableCollection<Tuple<string, string>> Urls { get; set; } = new ObservableCollection<Tuple<string, string>>();
+
+        /// <summary>
+        /// Tuple(url:string, title:string);
+        /// </summary>
+        public ObservableCollection<(string, string)> Urls { get; set; } = new ObservableCollection<(string, string)>();
         public DelegateCommand DownloadUrls { get; }
         public DelegateCommand SearchUrl { get; }
         public DelegateCommand<YoutubeResult> AddSelection { get; }
@@ -69,18 +73,22 @@ namespace AeroPlayer.ViewModels
             if (playlist != null)
             {
                 Console.WriteLine("downloading...");
-                string[] downloadUrls = new string[Urls.Count];
-                for (int i = 0; i < Urls.Count; i++)
-                {
-                    downloadUrls[i] = Urls[i].Item1;
-                }
+                string[] downloadUrls = Urls.Select(url => url.Item1).ToArray();
                 List<string> AddedSongs = null;
                 await Task.Run(() =>
                 {
-                    AddedSongs = YouTubeDownloader.DownloadSongs(downloadUrls, playlist.RelativePathName);
+                    try
+                    {
+                        AddedSongs = YouTubeDownloader.DownloadSongs(downloadUrls, playlist.RelativePathName);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error Downloading songs! Err : {0} ", e);
+                    }
                 });
-
-                bool worked = MusicManager.Instance.AddSongs(playlist.DisplayName, AddedSongs.ToArray());
+                bool? worked = null;
+                if (AddedSongs != null)
+                    worked = MusicManager.Instance.AddSongs(playlist.DisplayName, AddedSongs.ToArray());
                 Console.WriteLine(worked);
 
             }
@@ -113,7 +121,9 @@ namespace AeroPlayer.ViewModels
 
             if (Urls.Any(url => url.Item1 == youtubeResult.Url))
                 return;
-            Urls.Add(Tuple.Create(youtubeResult.Url, youtubeResult.Title));
+            var tup = (url: youtubeResult.Url, title: youtubeResult.Title);
+            
+            Urls.Add(tup);
 
         }
         public YoutubeDownloaderViewModel()

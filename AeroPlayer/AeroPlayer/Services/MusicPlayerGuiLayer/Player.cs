@@ -1,9 +1,8 @@
-﻿using AeroPlayerService;
+﻿using AeroPlayer.Views.Dialogs;
+using AeroPlayerService;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 
 namespace AeroPlayer.Services.MusicPlayerGuiLayer
 {
@@ -21,10 +20,17 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
             {
                 PlayLists.Add(SongManager.PlayLists[i]);
             }
+            onPropertyChanged("PlayLists");
         }
 
         public Player() : base()
         {
+            SongManager.OnErrorEvent += delegate (string errorMsg)
+             {
+                 ErrorDialog dialog = new ErrorDialog();
+                 dialog.ErrorText.Text = errorMsg;
+                 dialog.ShowDialog();
+             };
             SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool delete)
             {
 
@@ -44,8 +50,6 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
                     PlayLists.Add(playlist);
                 else
                     PlayLists[index] = playlist;
-                onPropertyChanged("PlayLists");
-
 
             };
             LoadPlayLists();

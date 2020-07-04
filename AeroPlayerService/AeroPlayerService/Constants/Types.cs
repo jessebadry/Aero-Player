@@ -6,6 +6,6 @@ namespace AeroPlayerService.Constants
 {
     public static class Types
     {
-       public static readonly List<string> AudioTypes =  new List<string>(){"wav", "mp3", "aiff"};
+       public static readonly string[] AudioTypes =  new string[]{"wav", "mp3", "aiff"};
     }
 }

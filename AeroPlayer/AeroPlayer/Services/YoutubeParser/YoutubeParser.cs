@@ -24,10 +24,9 @@ namespace AeroPlayer.Services.YoutubeParser
 
         }
         static readonly string output = "YoutubeDownloader/Images";
-
         static WebClient webclient;
 
-        public static async Task<string> getContentFromUrl(String Url)
+        public static async Task<string> GetContentFromUrl(string Url)
         {
             try
             {
@@ -44,7 +43,6 @@ namespace AeroPlayer.Services.YoutubeParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
                 OnError(ex.ToString());
             }
             return null;
@@ -78,11 +76,12 @@ namespace AeroPlayer.Services.YoutubeParser
             var youtubeResults = new List<YoutubeResult>();
             try
             {
-                string url = "https://www.youtube.com/results?search_query=" + query;
-                string htmlText = await getContentFromUrl(url);
+                string url = "https://www.youtube.com/results?search_query='" + query+"'";
+                string htmlText = await GetContentFromUrl(url);
                 var html = new HtmlDocument();
                 html.LoadHtml(htmlText);
-                
+                File.WriteAllText("test.html", htmlText);
+
                 var youtubeResultNodes = html.DocumentNode.SelectNodes("//div[@class='yt-lockup-dismissable yt-uix-tile']");
                 if (youtubeResultNodes == null)
                 {

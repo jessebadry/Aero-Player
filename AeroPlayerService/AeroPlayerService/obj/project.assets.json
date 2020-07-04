@@ -640,11 +640,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+      "projectUniqueName": "D:\\Code\\C# Code\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
       "projectName": "AeroPlayerService",
-      "projectPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
+      "projectPath": "D:\\Code\\C# Code\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\AeroPlayerService.csproj",
       "packagesPath": "C:\\Users\\jesse\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\C# Code\\Aero Player\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
+      "outputPath": "D:\\Code\\C# Code\\Aero-Player\\AeroPlayerService\\AeroPlayerService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "E:\\Microsoft\\Xamarin\\NuGet\\"

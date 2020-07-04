@@ -67,9 +67,7 @@ namespace AeroPlayerService
         }
         public Song(string songName) : base()
         {
-            Console.WriteLine(songName);
             FilePath = songName;
-            Console.WriteLine(RelativePlayListPath);
 
         }
     }

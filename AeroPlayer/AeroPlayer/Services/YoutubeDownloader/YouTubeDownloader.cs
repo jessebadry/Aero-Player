@@ -12,15 +12,15 @@ namespace  AeroPlayer.Services
         static readonly string YoutubeDownloaderPath = "MusicPlayer/DownloaderTemp/";
         public static List<string> DownloadSongs(string[] urls, string output)
         {
-
-
             var youtube = YouTube.Default;
             var results = new List<string>();
             Directory.CreateDirectory(YoutubeDownloaderPath);
 
+            //for (int i = 0; i < urls.Length; i++)
+            //    urls[i] = urls[i].Replace(" ", "");
             foreach (string url in urls)
             {
-
+                Console.WriteLine(url);
                 var vid = youtube.GetVideo(url);
                 string mp4Path = Path.Join(YoutubeDownloaderPath, vid.FullName);
                 File.WriteAllBytes(mp4Path, vid.GetBytes());
@@ -44,12 +44,11 @@ namespace  AeroPlayer.Services
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
                     invalid = true;
                 }
 
 
-                if (!invalid)
+                if (!invalid) 
                     results.Add(outputName);
 
             }

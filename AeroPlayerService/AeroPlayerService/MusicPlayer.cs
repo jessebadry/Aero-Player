@@ -46,7 +46,7 @@ namespace AeroPlayerService
         Timer PlayBackUpdateTimer;
 
         readonly WaveOutEvent AudioOut = new WaveOutEvent();
-        Mp3FileReader mp3Reader;
+        AudioFileReader mp3Reader;
 
         //Object that manages the songs the player uses.
 
@@ -145,7 +145,7 @@ namespace AeroPlayerService
         private void StartPositionListener()
         {
 
-            PlayBackUpdateTimer = new Timer(300);
+            PlayBackUpdateTimer = new Timer(50);
             PlayBackUpdateTimer.Elapsed += delegate (object sender, ElapsedEventArgs e)
             {
                 OnPositionChange();
@@ -230,7 +230,7 @@ namespace AeroPlayerService
                 mp3Reader.Dispose();
             }
 
-            mp3Reader = new Mp3FileReader(songName);
+            mp3Reader = new AudioFileReader(songName);
             AudioOut.Init(mp3Reader);
 
             PlaybackPos = 0;
@@ -302,7 +302,6 @@ namespace AeroPlayerService
             StartPositionListener();
 
             Song current = SongManager.CurrentPlayList?.CurrentSong;
-
             if (current != null)
                 PlaySong(current.RelativePlayListPath, current.FilePath);
         }
