@@ -1,4 +1,5 @@
-﻿using AeroPlayer.Views.Dialogs;
+﻿using AeroPlayer.Services.AeroPlayerErrorHandler;
+using AeroPlayer.Views.Dialogs;
 using AeroPlayerService;
 using System;
 using System.Collections.ObjectModel;
@@ -25,11 +26,13 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
 
         public Player() : base()
         {
+            OnError += delegate (object sender, string msg)
+             {
+                 AeroError.EmitError(msg);
+             };
             SongManager.OnErrorEvent += delegate (string errorMsg)
              {
-                 Console.WriteLine("Making dialog.. {0}", errorMsg);
-                 ErrorDialog dialog = new ErrorDialog();
-                 dialog.ErrorText.Text = errorMsg;
+                 ErrorDialog dialog = new ErrorDialog(errorMsg);
                  dialog.ShowDialog();
              };
             SongManager.OnPlaylistChange += delegate (object sender, PlayList playlist, bool delete)
@@ -44,7 +47,6 @@ namespace AeroPlayer.Services.MusicPlayerGuiLayer
 
                 int index = PlayLists.Select((Playlist, index) => new { Playlist, index })
                             .First(s => s.Playlist.DisplayName == playlist.DisplayName).index;
-
 
                 if (index >= 0 && index > PlayLists.Count - 1)
                     PlayLists.Add(playlist);

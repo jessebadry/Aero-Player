@@ -15,7 +15,7 @@ namespace AeroPlayerService
         Reset,
     }
     public delegate void MusicPlayerEventHandler(object sender, MusicPlayerEventArgs e);
-
+    public delegate void MusicPlayerErrorHandler(object sender, string errorMsg);
     public delegate void NewPlaybackEventHandler(object sender, EventArgs e);
 
     public class MusicPlayerEventArgs : EventArgs
@@ -40,19 +40,24 @@ namespace AeroPlayerService
         /// <summary>
         /// Controls the song that the player uses, implements Singleton.
         /// </summary>
-        public MusicManager SongManager {get;}
+        public MusicManager SongManager { get; }
 
         bool disposed = false;
         Timer PlayBackUpdateTimer;
 
         readonly WaveOutEvent AudioOut = new WaveOutEvent();
-        AudioFileReader mp3Reader;
+        MediaFoundationReader AudioReader;
 
-        //Object that manages the songs the player uses.
 
         //Events
         public event MusicPlayerEventHandler MusicPlayerEvent;
         public event NewPlaybackEventHandler OnPlaybackChange;
+        public event MusicPlayerErrorHandler OnError;
+
+        public void InvokeError(string msg)
+        {
+            OnError.Invoke(this, msg);
+        }
 
         PlaybackState UserDefinedPlayState = PlaybackState.Stopped;
 
@@ -66,8 +71,8 @@ namespace AeroPlayerService
             AudioOut.Dispose();
             if (!AudioIsNull())
             {
-                mp3Reader.Close();
-                mp3Reader.Dispose();
+                AudioReader.Close();
+                AudioReader.Dispose();
             }
 
             PlayListDisplay = "";
@@ -103,7 +108,7 @@ namespace AeroPlayerService
             {
                 double seconds;
                 if (!AudioIsNull())
-                    seconds = mp3Reader.TotalTime.TotalSeconds;
+                    seconds = AudioReader.TotalTime.TotalSeconds;
                 else return ZERO_AUDIO;
 
                 return seconds;
@@ -114,9 +119,9 @@ namespace AeroPlayerService
             get
             {
                 double time;
-                if (!AudioIsNull())
+                if (!AudioIsNull() && AudioReader.CurrentTime != null)
                 {
-                    time = mp3Reader.CurrentTime.TotalSeconds;
+                    time = AudioReader.CurrentTime.TotalSeconds;
                 }
                 else
                 {
@@ -131,8 +136,8 @@ namespace AeroPlayerService
                     try
                     {
                         TimeSpan time = TimeSpan.FromSeconds(value);
-                        if (time.TotalSeconds < AudioMaxLength)
-                            mp3Reader.CurrentTime = time;
+                        if (time.TotalSeconds < AudioMaxLength && AudioReader != null)
+                            AudioReader.CurrentTime = time;
                     }
                     catch (NullReferenceException)
                     {
@@ -162,11 +167,6 @@ namespace AeroPlayerService
             }
         }
 
-        public string SongDisplay
-        {
-            get => SongManager.CurrentSongDisplay;
-
-        }
 
 
         private string playlistDisplay;
@@ -180,7 +180,7 @@ namespace AeroPlayerService
 
             }
         }
-
+        //System Logic
         /// <summary>
         /// Toggles Audio playing=>paused, pause=>playing.
         /// <br/>If song is not initailized, music player will request new song from SongManager.
@@ -215,7 +215,7 @@ namespace AeroPlayerService
         /// Returns if mp3Reader is unusable
         /// </summary>
         /// <returns></returns>
-        public bool AudioIsNull() => mp3Reader == null;
+        public bool AudioIsNull() => AudioReader == null;
         private void LoadSong(string songName)
         {
             if (songName == null)
@@ -226,19 +226,20 @@ namespace AeroPlayerService
 
             if (!AudioIsNull())
             {
-                mp3Reader.Close();
-                mp3Reader.Dispose();
+                AudioReader.Close();
+                AudioReader.Dispose();
             }
 
-            mp3Reader = new AudioFileReader(songName);
-            AudioOut.Init(mp3Reader);
+            AudioReader = new MediaFoundationReader(songName);
+            AudioOut.Init(AudioReader);
 
             PlaybackPos = 0;
-            onPropertyChanged("SongDisplay");
         }
         public void PlaySong(string playlist, string songName)
         {
-            AudioOut.PlaybackStopped -= MusicStoppedHandler; // Remove MusicHandler as Current instance of AudioOut is being disposed.
+            // Remove MusicHandler because  Current instance of AudioOut is being disposed.
+
+            AudioOut.PlaybackStopped -= MusicStoppedHandler;
             LoadSong(songName);
             AudioOut.PlaybackStopped += MusicStoppedHandler;
 
@@ -248,8 +249,9 @@ namespace AeroPlayerService
                 {
                     AudioOut.Play();
                 }
-                catch (Exception) {
-
+                catch (Exception e)
+                {
+                    InvokeError(e.ToString());
                 }
             }
 
@@ -259,7 +261,6 @@ namespace AeroPlayerService
         private void MusicStoppedHandler(object sender, StoppedEventArgs e)
         {
             // handles what to do automatically after a song ends..
-            Console.WriteLine("stopped");
             switch (SongManager.LoopType)
             {
                 case PlayLoop.SingleLoop:
@@ -272,12 +273,15 @@ namespace AeroPlayerService
                 case PlayLoop.NoLoop:
                     SongManager.NextSong(DEFAULT_PLAYLIST_DIRECTION);
                     break;
+                case PlayLoop.Shuffle:
+                    SongManager.RandomSongInPlayList();
+                    break;
             }
 
         }
+
         protected void OnPositionChange()
         {
-
             NewPlaybackEventHandler handler = OnPlaybackChange;
             handler?.Invoke(this, new EventArgs());
         }
@@ -299,7 +303,7 @@ namespace AeroPlayerService
             };
             SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
-                PlaySong(e.PlayList, e.NewSong);
+                PlaySong(e.PlayList.RelativePathName, e.PlayList.CurrentSong.FilePath);
             };
             StartPositionListener();
 
@@ -314,7 +318,7 @@ namespace AeroPlayerService
 
             if (disposing)
             {
-                mp3Reader.Dispose();
+                AudioReader.Dispose();
                 AudioOut.Dispose();
             }
 

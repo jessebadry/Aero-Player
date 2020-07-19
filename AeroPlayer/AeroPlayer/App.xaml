@@ -3,9 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AeroPlayer"
              xmlns:Views="clr-namespace:AeroPlayer.Views"
-             StartupUri="MainWindow.xaml">
+             StartupUri="MainWindow.xaml"
+             
+             Exit="Application_Exit">
     <Application.Resources>
-        <ResourceDictionary   Source="WPFControls/ControlStyles.xaml"/>
-    
+
+        <ResourceDictionary   Source="WPFControls/ControlStyles.xaml">
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/ToastNotifications.Messages;component/Themes/Default.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+        </ResourceDictionary>
+
     </Application.Resources>
 </Application>

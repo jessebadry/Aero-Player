@@ -10,12 +10,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using ScrapySharp.Extensions;
+using OpenQA.Selenium.Support.UI;
+using System.Threading;
+using AeroPlayer.Services.AeroPlayerErrorHandler;
 
 namespace AeroPlayer.Services.YoutubeParser
 {
     public static class YoutubeParser
     {
-  
+
         public delegate void ErrorEvent(string error);
         public static event ErrorEvent ErrorEventHandler;
         private static void OnError(string error)
@@ -24,21 +30,27 @@ namespace AeroPlayer.Services.YoutubeParser
 
         }
         static readonly string output = "YoutubeDownloader/Images";
-        static WebClient webclient;
 
         public static async Task<string> GetContentFromUrl(string Url)
         {
             try
             {
-                webclient = new WebClient
+                string content = null;
+                await Task.Run(() =>
                 {
-                    Encoding = Encoding.UTF8
-                };
-                webclient.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; " +
-                                   "Windows NT 5.2; .NET CLR 1.0.3705;)");
-                Task<string> downloadStringTask = webclient.DownloadStringTaskAsync(new Uri(Url));
-                var content = await downloadStringTask;
 
+                    ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                    service.HideCommandPromptWindow = true;
+                    ChromeOptions options = new ChromeOptions();
+                    options.AddArgument("headless");
+                    var driver = new ChromeDriver(service, options);
+
+                    driver.Url = Url;
+                    driver.Navigate();
+                    content = driver.FindElement(By.TagName("body")).GetAttribute("innerHTML");
+                    driver.Quit();
+                });
+                //  File.WriteAllText("test.html", content);
                 return content.Replace('\r', ' ').Replace('\n', ' ');
             }
             catch (Exception ex)
@@ -47,129 +59,153 @@ namespace AeroPlayer.Services.YoutubeParser
             }
             return null;
         }
-        private static bool AttributesHasKey(string key, ref HtmlAttributeCollection htmlAttributes)
+        private static string GetKey(this HtmlAttributeCollection collection, string key)
         {
-            return htmlAttributes != null && htmlAttributes[key] != null;
-        }
-        private static void AssignNonNullAttribute(ref string output, HtmlAttributeCollection attrs, params string[] allowedKeys)
-        {
-            if (attrs == null)
-            {
-                OnError("Attributes Collection is null!");
-                return;
-            }
-                
+            var attr = collection[key];
 
-            for (int i = 0; i < allowedKeys.Length; i++)
+            return attr != null ? attr.Value : "";
+
+        }
+        //private static bool AttributesHasKey(string key, ref HtmlAttributeCollection htmlAttributes)
+        //{
+        //    return htmlAttributes != null && htmlAttributes[key] != null;
+        //}
+        //private static void AssignNonNullAttribute(ref string output, HtmlAttributeCollection attrs, params string[] allowedKeys)
+        //{
+        //    if (attrs == null)
+        //    {
+        //        OnError("Attributes Collection is null!");
+        //        return;
+        //    }
+
+
+        //    for (int i = 0; i < allowedKeys.Length; i++)
+        //    {
+        //        if (AttributesHasKey(allowedKeys[i], ref attrs))
+        //        {
+        //            output = attrs[allowedKeys[i]].Value;
+        //            return; // LEAVE FUNCTION
+        //        }
+        //    }
+        //}
+        public static string RemoveSpecialCharacters(this string str)
+        {
+            StringBuilder sb = new StringBuilder(str.Length);
+            foreach (char c in str)
             {
-                if (AttributesHasKey(allowedKeys[i], ref attrs))
+                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '.' || c == '_')
                 {
-                    output = attrs[allowedKeys[i]].Value;
-                    return; // LEAVE FUNCTION
+                    sb.Append(c);
                 }
             }
+            return sb.ToString();
         }
-
         public static async Task<List<YoutubeResult>> GetYoutubeQuery(string query)
         {
-       
+
             var youtubeResults = new List<YoutubeResult>();
             try
             {
-                string url = "https://www.youtube.com/results?search_query='" + query+"'";
+                string url = string.Format("https://www.youtube.com/results?search_query='{0}'", query);
                 string htmlText = await GetContentFromUrl(url);
                 var html = new HtmlDocument();
                 html.LoadHtml(htmlText);
-                File.WriteAllText("test.html", htmlText);
+                //File.WriteAllText("test.html", htmlText);
 
-                var youtubeResultNodes = html.DocumentNode.SelectNodes("//div[@class='yt-lockup-dismissable yt-uix-tile']");
-                if (youtubeResultNodes == null)
+                var youtubeResultNodes = html.DocumentNode.CssSelect("#dismissable");
+                if (youtubeResultNodes == null || youtubeResultNodes.Count() == 0)
                 {
-                    Console.WriteLine("Could not load query..");
-                    OnError("Could not load query");
-                  
+                    AeroError.EmitError("No Results found");
+
                     return null;
                 }
-
-                //Iterate all youtube results
-                for (int i = 0; i < youtubeResultNodes.Count; i++)
+                int youtubeResultCount = youtubeResultNodes.Count();
+                for (int i = 0; i < youtubeResultCount; i++)
                 {
-                    var node = youtubeResultNodes[i];
+                    HtmlNode node = youtubeResultNodes.ElementAt(i);
+                    var titleNode = node.CssSelect("#video-title");
+                    string YoutubeUrl = titleNode.Count() == 0 ? null : titleNode.First()?.Attributes?.GetKey("href");
 
-                    var thumbNailNode = node.SelectSingleNode("div[@class='yt-lockup-thumbnail contains-addto']/a/div/span/img");
-                    if (thumbNailNode == null)
-                        continue; // SKIP RESULT
-
-                    var imgAttrs = thumbNailNode.Attributes;
-
-                    // Get Thumbnail Url.
-                    string imgSrc = null;
-
-                    //If doesn't start with https, it is an invalid link, and also means that the img url is under 'data-thumb'  instead.
-                    if (AttributesHasKey("src", ref imgAttrs) && imgAttrs["src"].Value.StartsWith("https"))
-                        imgSrc = imgAttrs["src"].Value;
-                    else if (AttributesHasKey("data-thumb", ref imgAttrs))
-                        imgSrc = imgAttrs["data-thumb"].Value;
-                    else continue;
-
-                    //Get Node of detail content, title, url, views, description ect.
-                    var detailsNode = node.SelectSingleNode("div[@class='yt-lockup-content']");
-
-                    //<a> tag contains video title and the end part of the video url, EX: '/watch?v=ID'
-                    var videoATag = detailsNode.SelectSingleNode("h3/a");
-
-                    string title = videoATag.InnerText;
-
-                    //Creating FULL youtube link.
-                    string youtubeUrl = "https://www.youtube.com" + videoATag.Attributes["href"].Value;
-
-                    //Get Views
-                    var viewsNode = detailsNode.SelectSingleNode("(div[@class='yt-lockup-meta ']/ul/li)[2]");
+                    string Title = node.CssSelect("#video-title > yt-formatted-string").First().InnerText.Trim();
 
 
-                    string views = viewsNode == null ? "" : viewsNode.InnerText;
+                    if (string.IsNullOrEmpty(YoutubeUrl))
+                        continue;
 
-                    //Compile strings to Result object.
+                    YoutubeUrl = string.Format("https://www.youtube.com{0}", YoutubeUrl);
+
+                    string ThumbnailImage = node.CssSelect("#img")?.First().Attributes.GetKey("src");
+
+
                     var result = new YoutubeResult
                     {
-                        Url = youtubeUrl,
-                        ImgUrl = imgSrc,
-                        Title = title,
-                        Views = views,
-                        ImagePath = Path.Join(output, i + ".jpg"),
+                        Url = YoutubeUrl,
+                        ImgUrl = ThumbnailImage,
+                        Title = Title,
+                        ImagePath = Path.Join(output, i.ToString() + ".jpg"),
+
+                    };
+                    youtubeResults.Add(result);
+
+                }
+
+                var playlistResults = html.DocumentNode.CssSelect("#contents > ytd-playlist-renderer");
+                Console.WriteLine("playlists count = {0}", playlistResults.Count());
+
+                for (int i = 0; i < playlistResults.Count(); i++)
+                {
+                    var playlistVideoHeader = playlistResults.ElementAt(i);
+                    string YoutubeUrl = playlistVideoHeader.CssSelect("#content > a")?.First()?.Attributes?.GetKey("href");
+                    YoutubeUrl = string.Format("https://www.youtube.com{0}", YoutubeUrl);
+                    string thumbnailUrl = playlistVideoHeader.CssSelect("#img")?.First().Attributes.GetKey("src");
+                    if (string.IsNullOrEmpty(YoutubeUrl))
+                        continue;
+                    string playlistCount = playlistVideoHeader.CssSelect("#overlays > ytd-thumbnail-overlay-side-panel-renderer > yt-formatted-string")?.First().InnerText;
+               
+                    var youtubeResult = new YoutubeResult
+                    {
+                        Url = YoutubeUrl,
+                        ImgUrl = thumbnailUrl,
+                        Title = playlistVideoHeader.CssSelect("#video-title")?.First()?.Attributes?.GetKey("title") + " PLAYLIST",
+                        ImagePath = Path.Join(output, (i + youtubeResultCount).ToString() + ".jpg"),
+                        IsPlayList = true,
+                        PlayListCount = playlistCount,
+
                     };
 
-                    youtubeResults.Add(result);
+                    youtubeResults.Add(youtubeResult);
                 }
+
                 //END OF LOOP
                 await DownloadThumbnails(youtubeResults);
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 OnError(e.ToString());
             }
-           
+
             return youtubeResults;
         }
         private static async Task DownloadThumbnails(List<YoutubeResult> results)
         {
             var dir = Directory.CreateDirectory(output);
             await Task.WhenAll(results.Select(result => DownloadYoutubeThumbnail(result)));
-            foreach (FileInfo file in dir.EnumerateFiles())
-            {
-             
-                File.Delete(file.FullName);
-            }
+            foreach (string file in Directory.EnumerateFiles(output))
+                File.Delete(file);
+
             //Clear all bitmap memory.
             GC.Collect();
         }
         public static async Task DownloadYoutubeThumbnail(YoutubeResult result)
         {
+            if (string.IsNullOrEmpty(result.ImgUrl)) return;
+            using var client = new WebClient();
             try
             {
-               
-                using var client = new WebClient();
+
+
                 await client.DownloadFileTaskAsync(new Uri(result.ImgUrl), result.ImagePath);
 
                 var image = new BitmapImage();
@@ -180,7 +216,7 @@ namespace AeroPlayer.Services.YoutubeParser
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine("Could not download image, {0}", e);
                 OnError(e.ToString());
             }
 

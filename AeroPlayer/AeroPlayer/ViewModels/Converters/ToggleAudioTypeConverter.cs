@@ -14,7 +14,6 @@ namespace AeroPlayer.ViewModels.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string path = Path.GetFullPath(Path.Join("Images", Enum.GetName(typeof(PlayLoop), value) + ".jpg"));
-            Console.WriteLine("new path = " + path);
             return path;
         }
 

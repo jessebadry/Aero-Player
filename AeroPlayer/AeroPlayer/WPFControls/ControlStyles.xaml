@@ -4,6 +4,8 @@
                     xmlns:Views="clr-namespace:AeroPlayer.Views"
                     xmlns:YoutubeViews="clr-namespace:AeroPlayer.Views.YoutubeDownloader"
              xmlns:ViewModels="clr-namespace:AeroPlayer.ViewModels"
+                          xmlns:notifications="clr-namespace:Notifications.Wpf.Controls;assembly=Notifications.Wpf"
+             
                     >
 
     <Views:SongSelection x:Key="SongSelect"/>
@@ -12,10 +14,10 @@
     <ViewModels:YoutubeDownloaderViewModel x:Key="YoutubeDownloaderViewModel"/>
     <ViewModels:SongSelectionViewModel x:Key="SongSelectionViewModel"/>
     <ViewModels:SongDownloadDialogViewModel x:Key="SongDownloadDialogViewModel"/>
-    
-    
-    
-    
+
+
+
+
     <Style x:Key="MusicPlayerButton" TargetType="{x:Type Button}" >
         <Setter Property="Foreground" Value="White"></Setter>
         <Setter Property="Template">

@@ -1,6 +1,7 @@
-Aero-Player\AeroPlayer\AeroPlayer\bin
 AeroPlayer/.vs/
-Aero-Player\AeroPlayer\AeroPlayer\obj
-Aero-Player\AeroPlayer/AeroPlayer/obj/
-Aero-Player\AeroPlayer\AeroPlayerService\bin
-Aero-Player\AeroPlayer\AeroPlayerService\obj
+AeroPlayer/AeroPlayer/bin/
+AeroPlayer/AeroPlayer/obj
+AeroPlayer\AeroPlayerService\bin
+AeroPlayer\AeroPlayerService\obj
+AeroPlayerService/AeroPlayerService/bin/
+AeroPlayerService/AeroPlayerService/obj/

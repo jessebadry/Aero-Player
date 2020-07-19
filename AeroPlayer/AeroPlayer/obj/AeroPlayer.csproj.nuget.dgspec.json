@@ -124,11 +124,19 @@
           "dependencies": {
             "HtmlAgilityPack": {
               "target": "Package",
-              "version": "[1.11.21, )"
+              "version": "[1.11.24, )"
             },
-            "MediaToolkit": {
+            "ScrapySharp": {
               "target": "Package",
-              "version": "[1.1.0.1, )"
+              "version": "[3.0.0, )"
+            },
+            "Selenium.WebDriver": {
+              "target": "Package",
+              "version": "[3.141.0, )"
+            },
+            "Selenium.WebDriver.ChromeDriver": {
+              "target": "Package",
+              "version": "[83.0.4103.3910, )"
             },
             "System.Data.Common": {
               "target": "Package",
@@ -138,9 +146,13 @@
               "target": "Package",
               "version": "[4.7.0, )"
             },
-            "VideoLibrary": {
+            "ToastNotifications": {
               "target": "Package",
-              "version": "[3.0.1, )"
+              "version": "[2.5.1, )"
+            },
+            "ToastNotifications.Messages": {
+              "target": "Package",
+              "version": "[2.5.1, )"
             }
           },
           "imports": [

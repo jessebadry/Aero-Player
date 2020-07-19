@@ -29,6 +29,7 @@ namespace AeroPlayerService
      * Doing so will also open the possibility for organizing playlists without using folder structure and creating playlists that consist from
      * multiple playlists, called a Compilation Playlist.
      * 
+     * TODO:
      * The path will be programmatically set by using incrementation to name folders.
      * 
      * Json Structure:
@@ -61,26 +62,27 @@ namespace AeroPlayerService
         }
         public static PlayListData DeserializePlayLists()
         {
-            MusicManager.EnsureMusicPlayerPath();
+
             if (!File.Exists(SETTINGS_FILE))
                 File.Create(SETTINGS_FILE).Close();
             try
             {
                 return JsonConvert.DeserializeObject<PlayListData>(File.ReadAllText(SETTINGS_FILE));
             }
-            catch (JsonSerializationException)
+            catch (JsonSerializationException e)
             {
+                Console.WriteLine(e);
                 return null;
             }
-            catch (JsonReaderException)
+            catch (JsonReaderException e)
             {
+                Console.WriteLine(e);
                 return null;
             }
         }
 
         static PlayListLoader()
         {
-            MusicManager.EnsureMusicPlayerPath();
         }
 
 

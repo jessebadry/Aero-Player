@@ -20,7 +20,9 @@
                         
                         <Button Command="{Binding Path=DataContext.LoadSong, ElementName=PlayListContentControl}">Load</Button>
                         <Button Command="{Binding Path=DataContext.DeleteSong, ElementName=PlayListContentControl}"  CommandParameter="{Binding }">Delete</Button>
+                        
                         <TextBox TextAlignment="Center" FontSize="20" Foreground="Black"  Text="{Binding Path=SongDisplay}"></TextBox>
+                        
                     </DockPanel>
 
                 </DataTemplate>

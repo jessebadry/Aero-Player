@@ -1,80 +1,58 @@
-﻿using MediaToolkit;
-using MediaToolkit.Model;
+﻿using AeroPlayer.Services.AeroPlayerErrorHandler;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using VideoLibrary;
 
-namespace  AeroPlayer.Services
+namespace AeroPlayer.Services
 {
     public class YouTubeDownloader
     {
         static readonly string YoutubeDownloaderPath = "MusicPlayer/DownloaderTemp/";
-        public static List<string> DownloadSongs(string[] urls, string output)
+        static readonly string SongPath = Path.Join(YoutubeDownloaderPath, "Songs");
+        public static string[] DownloadSongs(string[] urls)
         {
-            var youtube = YouTube.Default;
-            var results = new List<string>();
-            Directory.CreateDirectory(YoutubeDownloaderPath);
-
-            //for (int i = 0; i < urls.Length; i++)
-            //    urls[i] = urls[i].Replace(" ", "");
+            Directory.CreateDirectory(SongPath);
+            ClearTemp();
+            string path = Path.Join(SongPath, "%(title)s.mp3");
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "youtube-dl.exe",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
             foreach (string url in urls)
             {
-                Console.WriteLine(url);
-                var vid = youtube.GetVideo(url);
-                string mp4Path = Path.Join(YoutubeDownloaderPath, vid.FullName);
-                File.WriteAllBytes(mp4Path, vid.GetBytes());
+                Process downloadYoutubeVids = new Process();
 
-                var inputFile = new MediaFile { Filename = YoutubeDownloaderPath + vid.FullName };
+                startInfo.Arguments = string.Format("-f bestaudio {0} -o \"{1}\"", url, path);
+                downloadYoutubeVids.StartInfo = startInfo;
 
-                string outputName = Path.Join(output, Path.GetFileNameWithoutExtension(vid.FullName)) + ".mp3";
+                downloadYoutubeVids.Start();
+                downloadYoutubeVids.WaitForExit();
 
-                bool invalid = false;
+            }
+            var files = Directory.GetFiles(SongPath);
+
+
+            return files;
+        }
+        public static void ClearTemp()
+        {
+
+            foreach (var file in Directory.GetFiles(SongPath))
+            {
                 try
                 {
-                    var outputFile = new MediaFile { Filename = outputName };
-
-                    using (var engine = new Engine())
-                    {
-                        engine.GetMetadata(inputFile);
-
-                        engine.Convert(inputFile, outputFile);
-                    }
-
+                    File.Delete(file);
                 }
                 catch (Exception e)
                 {
-                    invalid = true;
+                    AeroError.EmitError(e.ToString());
                 }
-
-
-                if (!invalid) 
-                    results.Add(outputName);
-
             }
-            GC.Collect();
-
-            return results;
         }
-        public static void GetSong(string url)
-        {
-            var source = @"MusicPlayer\";
-            var youtube = YouTube.Default;
-            var vid = youtube.GetVideo(url);
-            File.WriteAllBytes(source + vid.FullName, vid.GetBytes());
 
-            var inputFile = new MediaFile { Filename = source + vid.FullName };
-            var outputFile = new MediaFile { Filename = $"{source + Path.GetFileNameWithoutExtension(vid.FullName)}.mp3" };
-
-            using (var engine = new Engine())
-            {
-                engine.GetMetadata(inputFile);
-
-                engine.Convert(inputFile, outputFile);
-            }
-
-
-        }
 
     }
 }

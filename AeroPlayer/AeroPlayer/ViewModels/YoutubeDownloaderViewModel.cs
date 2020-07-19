@@ -1,5 +1,6 @@
 ﻿using AeroPlayer.Models;
 using AeroPlayer.Services;
+using AeroPlayer.Services.Notifications;
 using AeroPlayer.Views.Dialogs;
 using AeroPlayerService;
 using System;
@@ -14,8 +15,8 @@ namespace AeroPlayer.ViewModels
     class YoutubeDownloaderViewModel : PropertyObject
     {
         private bool isSearchingYoutube = false;
-        (string, string) selectedSong;
-        public (string, string) SelectedSong
+        Tuple<string, string> selectedSong;
+        public Tuple<string, string> SelectedSong
         {
             get
             {
@@ -60,7 +61,7 @@ namespace AeroPlayer.ViewModels
         /// <summary>
         /// Tuple(url:string, title:string);
         /// </summary>
-        public ObservableCollection<(string, string)> Urls { get; set; } = new ObservableCollection<(string, string)>();
+        public ObservableCollection<Tuple<string, string>> Urls { get; set; } = new ObservableCollection<Tuple<string, string>>();
         public DelegateCommand DownloadUrls { get; }
         public DelegateCommand SearchUrl { get; }
         public DelegateCommand<YoutubeResult> AddSelection { get; }
@@ -69,17 +70,30 @@ namespace AeroPlayer.ViewModels
         public async void DownloadUrlsDelegate()
         {
 
+            //Make checks from user before downloading songs
+            if (MusicManager.Instance.PlayLists.Count == 0)
+            {
+                var dialog = new ErrorDialog("There are no avaliable playlists! Please make one");
+                dialog.ShowDialog();
+                return;
+
+            }
+            else if (Urls.Count == 0)
+            {
+                var dialog = new ErrorDialog("You have not selected any songs to download!");
+                dialog.ShowDialog();
+                return;
+            }
             PlayList playlist = RunSelectPlayListDialog();
             if (playlist != null)
             {
-                Console.WriteLine("downloading...");
                 string[] downloadUrls = Urls.Select(url => url.Item1).ToArray();
-                List<string> AddedSongs = null;
+                string[] AddedSongs = null;
                 await Task.Run(() =>
                 {
                     try
                     {
-                        AddedSongs = YouTubeDownloader.DownloadSongs(downloadUrls, playlist.RelativePathName);
+                        AddedSongs = YouTubeDownloader.DownloadSongs(downloadUrls);
                     }
                     catch (Exception e)
                     {
@@ -88,7 +102,7 @@ namespace AeroPlayer.ViewModels
                 });
                 bool? worked = null;
                 if (AddedSongs != null)
-                    worked = MusicManager.Instance.AddSongs(playlist.DisplayName, AddedSongs.ToArray());
+                    worked = MusicManager.Instance.AddSongs(playlist.DisplayName, AddedSongs);
                 Console.WriteLine(worked);
 
             }
@@ -105,6 +119,7 @@ namespace AeroPlayer.ViewModels
 
             isSearchingYoutube = true;
             YoutubeResults.Clear();
+            Aerocations.ShowInfoNotification(string.Format("Searching Youtube results for '{0}'", Url));
 
             var results = await GetYoutubeQuery(Url);
             if (results != null)
@@ -119,10 +134,12 @@ namespace AeroPlayer.ViewModels
         {
             var youtubeResult = (YoutubeResult)sender;
 
+            Console.WriteLine("result that's being added = {0}", youtubeResult.Title);
             if (Urls.Any(url => url.Item1 == youtubeResult.Url))
                 return;
-            var tup = (url: youtubeResult.Url, title: youtubeResult.Title);
-            
+
+            var tup = Tuple.Create(youtubeResult.Url, youtubeResult.Title);
+
             Urls.Add(tup);
 
         }

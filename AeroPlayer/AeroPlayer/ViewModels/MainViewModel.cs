@@ -117,7 +117,7 @@ namespace AeroPlayer.ViewModels
             GuiPlayer.SongManager.OnSongChange += delegate (object sender, MusicManagerEventArgs e)
             {
 
-                CurrentPlayList = e.PlayListDisplay;
+                CurrentPlayList = e.PlayList.DisplayName;
                 onPropertyChanged("PlaybackPos");
                 onPropertyChanged("PlayBackLength");
             };

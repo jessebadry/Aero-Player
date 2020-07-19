@@ -8,6 +8,8 @@ using AeroPlayer.Services.MusicPlayerGuiLayer;
 using System.Diagnostics;
 using System.IO;
 using AeroPlayerService;
+using AeroPlayer.Services.Notifications;
+using AeroPlayer.Services.AeroPlayerErrorHandler;
 
 namespace AeroPlayer.ViewModels
 {
@@ -125,11 +127,20 @@ namespace AeroPlayer.ViewModels
         public void DeleteSongDelegate(Song song)
         {
             Console.WriteLine("Deleting song..");
+            if (song == null)
+            {
+                AeroError.EmitError("No Song is selected!");
+                return;
+            }
             SongManager.DeleteSong(song);
         }
         public void DeletePlayListDelegate(PlayList PlayList)
         {
-           
+            if (PlayList == null)
+            {
+                AeroError.EmitError("No PlayList is selected!");
+                return;
+            }
             SongManager.DeletePlaylist(PlayList.DisplayName);
         }
         private void AddSongDelegate()

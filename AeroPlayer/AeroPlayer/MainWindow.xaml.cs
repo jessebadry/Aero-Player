@@ -21,14 +21,18 @@ namespace AeroPlayer
     /// </summary>
     public partial class MainWindow : Window
     {
+       
+
         public MainWindow()
         {
             DataContext = new MainViewModel();
             InitializeComponent();
         }
-
+       
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+          //  notificationManager = null;
+         
             ((MainViewModel)DataContext).SongManager.Save();
         }
     }

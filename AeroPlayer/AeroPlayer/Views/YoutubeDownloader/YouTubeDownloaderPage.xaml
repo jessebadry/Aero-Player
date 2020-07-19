@@ -4,10 +4,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AeroPlayer.Views.YoutubeDownloader"
+             xmlns:converters="clr-namespace:AeroPlayer.ViewModels.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+             
       DataContext="{StaticResource YoutubeDownloaderViewModel}">
-
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -39,8 +43,14 @@
         </ListBox>
         <Button Content="Downloaded Selected" Command="{Binding DownloadUrls}" Grid.Row="3"></Button>
         <TextBlock Grid.Column="0" Text="Search Youtube: "></TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url}"></TextBox>
-        <Button Grid.Row="0" Grid.Column="2" Width="100" Command="{Binding SearchUrl}">Search Url</Button>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" >
+
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding SearchUrl}" />
+            </TextBox.InputBindings>
+
+        </TextBox>
+        <Button Grid.Row="0" Grid.Column="2" Width="100" x:Name="SearchButton" Command="{Binding SearchUrl}">Search Url</Button>
         <ListBox x:Name="YoutubeList" Grid.RowSpan="3"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding YoutubeResults}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -49,10 +59,11 @@
                             <Image  Grid.Row="1" Source="{Binding ImageBitMap}" Width="120" Height="120"  Margin="0,0,0,0" d:LayoutOverrides="Width"/>
                             
                             <TextBlock Grid.Row="0" TextAlignment="Center" Text="{Binding Title}" FontSize="20"></TextBlock>
-                       
+                            <TextBlock Visibility="{Binding Path=IsPlayList, Converter={StaticResource BooleanToVisibilityConverter}}" Text="{Binding PlayListCount }"></TextBlock>
+
 
                         </DockPanel>
-                        <Button Height="50" x:Name="btn"  Content="Download" HorizontalAlignment="Left"
+                       <Button Height="50" x:Name="btn"  Content="Download" HorizontalAlignment="Left"
                                     Command="{Binding Path=DataContext.AddSelection, ElementName=YoutubeList}"  CommandParameter="{Binding  }"></Button>
 
                     </StackPanel>

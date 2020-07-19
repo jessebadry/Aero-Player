@@ -21,5 +21,10 @@ namespace AeroPlayer.Views.Dialogs
         {
             InitializeComponent();
         }
+        public ErrorDialog(string msg) : base()
+        {
+            InitializeComponent();
+            this.ErrorText.Text = msg;
+        }
     }
 }

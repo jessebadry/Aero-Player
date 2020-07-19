@@ -21,10 +21,14 @@ namespace AeroPlayerService
             set
             {
                 //Index change of current index changes CurrentSong, so must update currentsong...
-                if (value > Songs.Count - 1)
+                if (value > Songs?.Count - 1)
                     currentIndex = 0;
                 else if (value < 0)
-                    currentIndex = Songs.Count - 1;
+                {
+                    if (Songs == null) currentIndex = -1;
+                    else currentIndex = Songs.Count - 1;
+                }
+
                 else
                     currentIndex = value;
 
@@ -40,7 +44,7 @@ namespace AeroPlayerService
                 if (!File.Exists(Songs[i].FilePath))
                     Songs.Remove(Songs[i]);
             }
-       
+
         }
         public void RemoveSong(Song song)
         {
@@ -60,15 +64,17 @@ namespace AeroPlayerService
             {
                 displayName = value;
                 onPropertyChanged("DisplayName");
+               
             }
         }
-        private string RelativePathName_;
+        private string RelativePathName_; 	
+
 
         public string RelativePathName
         {
             get
             {
-               
+
                 return RelativePathName_;
             }
             set
@@ -158,6 +164,16 @@ namespace AeroPlayerService
                 throw new IndexOutOfRangeException(string.Format("Out of range for Songslist playlist = {0}, index supplied = {1}", RelativePathName, index));
             }
         }
+
+        public void PickRandomSong()
+        {
+            int SongLength = Songs.Count;
+            if (SongLength >= 1)
+            {
+                Random r = new Random();
+                CurrentIndex = r.Next(0, SongLength);
+            }
+        }
         public bool NextSong(bool next)
         {
             if (CurrentIndex >= Songs.Count - 1 && next)
@@ -205,10 +221,7 @@ namespace AeroPlayerService
             }
             return true;
         }
-        public PlayList()
-        {
-
-        }
+     
         public static bool IsAudioFile(string song)
         {
             if (song == null)
@@ -223,7 +236,17 @@ namespace AeroPlayerService
 
             return isValid;
         }
+        /// <summary>
+        /// REQUIRED FOR SERIALIZATION
+        /// </summary>
+        public PlayList()
+        {
 
+        }
+        public PlayList(string playlistPath, List<Song> songs) : this(playlistPath)
+        {
+            this.Songs = songs;
+        }
         public PlayList(string playListPath)
         {
             this.RelativePathName_ = playListPath;

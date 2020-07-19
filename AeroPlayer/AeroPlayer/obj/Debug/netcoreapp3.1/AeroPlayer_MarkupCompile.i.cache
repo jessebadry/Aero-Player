@@ -1,7 +1,7 @@
 ﻿AeroPlayer
 
 
-exe
+winexe
 C#
 .cs
 D:\Code\C# Code\Aero-Player\AeroPlayer\AeroPlayer\obj\Debug\netcoreapp3.1\
@@ -11,9 +11,9 @@ false
 TRACE;DEBUG;NETCOREAPP;NETCOREAPP3_1
 D:\Code\C# Code\Aero-Player\AeroPlayer\AeroPlayer\App.xaml
 81752628814
-3-820412066
-21918407972
-200883054443
+4-1093689699
+242086391292
+2041898565205
 MainWindow.xaml;Views\Dialogs\ErrorDialog.xaml;Views\Dialogs\InputDialog.xaml;Views\Dialogs\SongDownloadDialog.xaml;Views\SongSelection.xaml;Views\YoutubeDownloader\YouTubeDownloaderPage.xaml;WPFControls\ControlStyles.xaml;WPFControls\SongSelectionTemplate.xaml;
 
 False
